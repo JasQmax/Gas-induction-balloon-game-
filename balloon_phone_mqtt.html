@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balloon Remote Control</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        body { margin: 0; height: 100vh; background: #2c3e50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; box-sizing: border-box; text-align: center; }
+
+        #setup-ui { width: 100%; max-width: 300px; display: flex; flex-direction: column; align-items: center; }
+        input { font-size: 36px; padding: 15px; width: 100%; text-align: center; letter-spacing: 5px; border-radius: 10px; border: none; margin-bottom: 20px; font-weight: bold; outline: none; }
+        .btn-connect { background: #2ecc71; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+
+        #controller-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        #big-breath-btn { 
+            width: 250px; height: 250px; border-radius: 50%; background: #e74c3c; 
+            border: 10px solid #c0392b; color: white; font-size: 40px; font-weight: bold; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; 
+            -webkit-tap-highlight-color: transparent; outline: none;
+        }
+        #big-breath-btn:active { transform: scale(0.92); box-shadow: 0 5px 10px rgba(0,0,0,0.5); background: #c0392b; }
+
+        #status-text { margin-top: 30px; font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="setup-ui">
+        <h2>Enter Tablet PIN 🎈</h2>
+        <input type="number" id="pin-input" placeholder="1234" maxlength="4" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+        <button class="btn-connect" onclick="connectToTablet()">CONNECT</button>
+        <div id="status-text" style="color: #f1c40f; margin-top:15px;"></div>
+    </div>
+
+    <div id="controller-ui">
+        <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
+        <div id="status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
+    </div>
+
+    <script>
+        let client;
+        let activeTopic;
+
+        function connectToTablet() {
+            const pin = document.getElementById('pin-input').value;
+            if (pin.length !== 4) { alert("Please enter the 4-digit PIN."); return; }
+
+            document.getElementById('status-text').innerText = "Connecting...";
+            activeTopic = 'anes-balloon/' + pin;
+
+            // Connect to public EMQX broker
+            client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+
+            client.on('connect', () => {
+                // Send hello to wake up the tablet UI
+                client.publish(activeTopic, 'HELLO');
+
+                document.getElementById('setup-ui').style.display = 'none';
+                document.getElementById('controller-ui').style.display = 'flex';
+            });
+
+            client.on('error', (err) => {
+                document.getElementById('status-text').innerText = "Failed to connect.";
+            });
+        }
+
+        function sendBreath() {
+            if (client && client.connected) {
+                client.publish(activeTopic, 'BREATH');
+                if(navigator.vibrate) navigator.vibrate(50);
+            }
+        }
+    </script>
+</body>
+</html>
