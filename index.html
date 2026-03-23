@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedi Anes - Balloon Induction</title>
+    <style>
+        body { 
+            margin: 0; padding: 20px; 
+            background: #f0f4f8; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; text-align: center;
+        }
+        .container {
+            background: white; padding: 40px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 400px; width: 100%;
+        }
+        h1 { color: #2c3e50; margin-top: 0; font-size: 28px; }
+        p { color: #7f8c8d; margin-bottom: 30px; font-size: 16px; line-height: 1.5; }
+
+        .btn { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 100%; padding: 20px; margin-bottom: 20px; 
+            border-radius: 15px; text-decoration: none; 
+            font-size: 20px; font-weight: bold; color: white; 
+            transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 7px 15px rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-tablet { background: #4CAF50; }
+        .btn-phone { background: #2196F3; }
+
+        .icon { font-size: 30px; margin-right: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎈 Balloon Induction</h1>
+        <p>Select which device you are currently holding to start the induction game.</p>
+
+        <a href="balloon_tablet.html" class="btn btn-tablet">
+            <span class="icon">📱</span> Patient Tablet
+        </a>
+
+        <a href="balloon_phone.html" class="btn btn-phone">
+            <span class="icon">📲</span> Doctor Remote
+        </a>
+    </div>
+</body>
+</html>
