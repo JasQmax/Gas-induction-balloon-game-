@@ -1,3 +1,27 @@
-<html>
-<!-- Content of the old file balloon_tablet_red_cross_only.html goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Racing Game</title>
+    <style>
+        /* Add your styles here */
+    </style>
+    <script src="https://www.example.com/mqtt.js"></script>
+</head>
+<body>
+    <h1>Welcome to the Balloon Racing Game!</h1>
+    <div id="game-container">
+        <!-- Game content goes here -->
+    </div>
+    <script>
+        // Initialize MQTT connectivity
+        const mqtt = new MQTT.Client('broker.hivemq.com', 8000, 'clientId');
+        mqtt.onMessageArrived = function(message) {
+            // Handle incoming messages
+        };
+        mqtt.connect();
+        // Game logic and animations go here
+    </script>
+</body>
 </html>
