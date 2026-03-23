@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balloon Racing Game</title>
+    <title>Hot Air Balloon Racing Game</title>
     <style>
-        /* Add your styles here */
+        /* Add your CSS here */
+        body { background-color: #87CEEB; }
+        /* Other styles... */
     </style>
-    <script src="https://www.example.com/mqtt.js"></script>
 </head>
 <body>
-    <h1>Welcome to the Balloon Racing Game!</h1>
-    <div id="game-container">
-        <!-- Game content goes here -->
+    <h1>Hot Air Balloon Racing Game</h1>
+    <div class="balloon-container">
+        <!-- Balloons and game elements go here -->
     </div>
     <script>
-        // Initialize MQTT connectivity
-        const mqtt = new MQTT.Client('broker.hivemq.com', 8000, 'clientId');
-        mqtt.onMessageArrived = function(message) {
-            // Handle incoming messages
-        };
-        mqtt.connect();
-        // Game logic and animations go here
+        // MQTT setup and game logic here
+        function takeBreath() {
+            // Logic for breath tracking
+            // Implementation of the panic mode
+        }
+        // Other JavaScript functions...
     </script>
 </body>
 </html>
