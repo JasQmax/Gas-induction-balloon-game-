@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Air Balloon - TABLET (20 Breaths)</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 90; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); text-align: center; max-width: 500px; width: 90%; position: relative; }
+
+        #stealth-pin-container { position: absolute; top: 15px; right: 20px; font-family: monospace; color: #ccc; font-size: 14px; text-align: right; }
+        #stealth-pin { font-size: 24px; font-weight: bold; color: #999; letter-spacing: 2px; }
+        #conn-indicator { font-size: 10px; color: orange; margin-top: 2px; }
+
+        #custom-name { font-size: 24px; padding: 10px; width: 80%; border: 2px solid #ccc; border-radius: 10px; margin: 15px 0; text-align: center; font-weight: bold; }
+        .color-row { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+        .color-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .color-btn.selected { border-color: #333; transform: scale(1.1); }
+        .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+
+        .hidden { display: none !important; }
+
+        #sky { flex: 1; position: relative; display: flex; justify-content: space-around; align-items: flex-end; padding-bottom: 20px; border-bottom: 8px solid #4CAF50; overflow: hidden; }
+
+        .cloud { position: absolute; color: white; opacity: 0.8; user-select: none; z-index: 1; }
+
+        .bird-container { position: absolute; z-index: 5; animation: flyRight linear infinite; }
+        .bird-svg { width: 50px; height: 50px; animation: flap 0.6s ease-in-out infinite alternate; }
+
+        @keyframes flap { 0% { transform: scaleY(1); } 100% { transform: scaleY(-0.4); } }
+        @keyframes flyRight {
+            0% { transform: translateX(-10vw) translateY(0); }
+            50% { transform: translateX(50vw) translateY(-20px); }
+            100% { transform: translateX(110vw) translateY(0); }
+        }
+
+        .bird-1 { top: 12%; animation-duration: 18s; }
+        .bird-2 { top: 22%; animation-duration: 22s; animation-delay: 3s; transform: scale(0.7); }
+        .bird-3 { top: 8%; animation-duration: 25s; animation-delay: 9s; transform: scale(0.5); }
+        .bird-4 { top: 30%; animation-duration: 15s; animation-delay: 12s; transform: scale(0.8); }
+
+        .finish-line { position: absolute; top: 15%; width: 100%; height: 20px; background: repeating-linear-gradient(90deg, #fff, #fff 20px, #FF5252 20px, #FF5252 40px); opacity: 0.9; z-index: 2; }
+        .finish-text { position: absolute; top: calc(15% - 25px); width: 100%; text-align: center; font-weight: bold; color: #333; font-size: 20px; letter-spacing: 2px; z-index: 2; }
+
+        .track { width: 40%; height: 100%; position: relative; display: flex; justify-content: center; z-index: 10; }
+        .balloon-container { position: absolute; bottom: 0; transition: bottom 1s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; align-items: center; }
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        .burner { width: 16px; height: 25px; background: orange; border-radius: 50% 50% 20% 20%; position: absolute; bottom: 30px; opacity: 0; filter: blur(1px); }
+        .burner.active { opacity: 1; animation: flame_flickering 0.1s infinite alternate; }
+        @keyframes flame_flickering { 0% { transform: scaleY(1) rotate(-2deg); background: yellow; box-shadow: 0 0 10px yellow; } 100% { transform: scaleY(1.4) rotate(2deg); background: #FF5722; box-shadow: 0 0 20px red; } }
+
+        .label { margin-top: 8px; font-weight: bold; color: #333; background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 15px; font-size: 20px; }
+
+        #controls { height: 80px; background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.15); z-index: 20; transition: background-color 0.5s; }
+        #status { font-size: 22px; font-weight: bold; color: #333; transition: color 0.5s; }
+
+        .panic-mode { background-color: #ffebee !important; }
+        .panic-text { color: #d32f2f !important; font-size: 26px !important; }
+
+        #breath-counter { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 18px; z-index: 50; }
+    </style>
+</head>
+<body>
+    <div id="breath-counter">Breaths: 0/20</div>
+
+    <div id="customization-ui" class="modal-overlay">
+        <div class="modal-content">
+            <div id="stealth-pin-container">
+                <div id="stealth-pin">1234</div>
+                <div id="conn-indicator">Connecting...</div>
+            </div>
+            <h1 style="margin-top:0; color:#333;">Design Your Balloon! 🎈</h1>
+            <svg id="preview-balloon" width="120" height="150" viewBox="0 0 100 120">
+                <path id="prev-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
+                <path id="prev-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
+                <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
+            </svg>
+            <input type="text" id="custom-name" placeholder="What is your name?" autocomplete="off" maxlength="12">
+            <div class="color-row">
+                <div class="color-btn selected" style="background: #FF5252;" onclick="selectColor(this, '#FFC107', '#FF5252')"></div>
+                <div class="color-btn" style="background: #2196F3;" onclick="selectColor(this, '#BBDEFB', '#2196F3')"></div>
+                <div class="color-btn" style="background: #4CAF50;" onclick="selectColor(this, '#C8E6C9', '#4CAF50')"></div>
+                <div class="color-btn" style="background: #9C27B0;" onclick="selectColor(this, '#E1BEE7', '#9C27B0')"></div>
+                <div class="color-btn" style="background: #E91E63;" onclick="selectColor(this, '#F8BBD0', '#E91E63')"></div>
+            </div>
+            <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
+        </div>
+    </div>
+
+    <div id="sky">
+        <div class="cloud" style="top: 5%; left: 5%; font-size: 60px;">☁️</div>
+        <div class="cloud" style="top: 8%; left: 45%; font-size: 40px; opacity:0.6;">☁️</div>
+        <div class="cloud" style="top: 15%; right: 15%; font-size: 70px;">☁️</div>
+        <div class="cloud" style="top: 25%; left: 25%; font-size: 85px;">☁️</div>
+        <div class="cloud" style="top: 35%; right: 30%; font-size: 50px;">☁️</div>
+        <div class="cloud" style="top: 45%; left: 10%; font-size: 65px;">☁️</div>
+        <div class="cloud" style="top: 55%; right: 5%; font-size: 90px; opacity:0.5;">☁️</div>
+        <div class="cloud" style="top: 65%; left: 40%; font-size: 45px;">☁️</div>
+        <div class="cloud" style="top: 75%; right: 40%; font-size: 60px;">☁️</div>
+        <div class="cloud" style="top: 85%; left: 15%; font-size: 75px; opacity:0.7;">☁️</div>
+
+        <div class="bird-container bird-1"><svg class="bird-svg" viewBox="0 0 100 100"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#2c3e50" /></svg></div>
+        <div class="bird-container bird-2"><svg class="bird-svg" viewBox="0 0 100 100" style="animation-delay: 0.2s;"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#34495e" /></svg></div>
+        <div class="bird-container bird-3"><svg class="bird-svg" viewBox="0 0 100 100" style="animation-delay: 0.5s;"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#2c3e50" /></svg></div>
+        <div class="bird-container bird-4"><svg class="bird-svg" viewBox="0 0 100 100" style="animation-delay: 0.1s;"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#34495e" /></svg></div>
+
+        <div class="finish-text">FINISH LINE</div>
+        <div class="finish-line"></div>
+
+        <div class="track">
+            <div id="balloon-doc" class="balloon-container floating">
+                <!-- DOCTOR BALLOON: Red Cross Only -->
+                <svg width="100" height="130" viewBox="0 0 100 120">
+                    <path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#4DD0E1"/>
+
+                    <!-- Clean White Circle with Red Cross -->
+                    <circle cx="50" cy="45" r="18" fill="white" />
+                    <rect x="46" y="33" width="8" height="24" fill="#FF5252" />
+                    <rect x="38" y="41" width="24" height="8" fill="#FF5252" />
+
+                    <rect x="40" y="105" width="20" height="15" fill="#8D6E63"/>
+                </svg>
+                <div class="burner" id="burner-doc"></div><div class="label">Dr. Balloon</div>
+            </div>
+        </div>
+
+        <div class="track">
+            <div id="balloon-kid" class="balloon-container floating">
+                <svg width="100" height="130" viewBox="0 0 100 120"><path id="game-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/><path id="game-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/><rect x="40" y="105" width="20" height="15" fill="#5D4037"/></svg>
+                <div class="burner" id="burner-kid"></div><div id="kid-label" class="label">You!</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls"><div id="status">Let's get ready!</div></div>
+
+    <script>
+        let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
+        function selectColor(btn, bg, stripe) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected'); chosenBg = bg; chosenStripe = stripe;
+            document.getElementById('prev-bg').setAttribute('fill', bg); document.getElementById('prev-stripe').setAttribute('fill', stripe);
+        }
+
+        function finishCustomization() {
+            const kidName = document.getElementById('custom-name').value.trim() || 'You!';
+            document.getElementById('kid-label').innerText = kidName;
+            document.getElementById('game-bg').setAttribute('fill', chosenBg); document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
+            document.getElementById('customization-ui').classList.add('hidden');
+            document.getElementById('status').innerText = 'Take a big breath to start the race!';
+            document.getElementById('status').style.color = '#4CAF50';
+
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        }
+
+        const pin = Math.floor(1000 + Math.random() * 9000).toString();
+        const topic = 'anes-balloon/' + pin;
+        document.getElementById('stealth-pin').innerText = pin;
+
+        const clientId = 'tablet_' + Math.random().toString(16).substring(2, 8);
+        const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', { clientId: clientId, keepalive: 60 });
+
+        client.on('connect', () => {
+            document.getElementById('conn-indicator').innerText = "Server OK";
+            document.getElementById('conn-indicator').style.color = 'green';
+            client.subscribe(topic);
+        });
+
+        client.on('message', (t, message) => {
+            if (message.toString() === 'HELLO') {
+                document.getElementById('conn-indicator').innerText = "📱 Paired";
+                document.getElementById('conn-indicator').style.color = '#4CAF50';
+                document.getElementById('stealth-pin').style.color = '#4CAF50';
+            }
+            if (message.toString() === 'BREATH') { takeBreath(); }
+        });
+
+        let breaths = 0; 
+        const maxBreaths = 20; 
+        const finishHeight = 70; 
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBurnerSound(isDoc) {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const now = audioCtx.currentTime;
+
+            const bufferSize = audioCtx.sampleRate * 1.5; 
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0); 
+            for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+
+            const noiseSource = audioCtx.createBufferSource(); 
+            noiseSource.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter(); 
+            filter.type = 'lowpass'; 
+            filter.frequency.setValueAtTime(isDoc ? 450 : 350, now); 
+
+            const gainNode = audioCtx.createGain(); 
+            gainNode.gain.setValueAtTime(0, now);
+            const maxVolume = isDoc ? 0.4 : 0.8;
+
+            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.1); 
+            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.9); 
+            gainNode.gain.linearRampToValueAtTime(0, now + 1.2);
+
+            noiseSource.connect(filter); 
+            filter.connect(gainNode); 
+            gainNode.connect(audioCtx.destination); 
+
+            noiseSource.start(now);
+        }
+
+        function triggerConfetti() {
+            var duration = 3 * 1000; var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: [chosenStripe, chosenBg, '#ffffff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: [chosenStripe, chosenBg, '#ffffff'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        function takeBreath() {
+            if (!document.getElementById('customization-ui').classList.contains('hidden')) return;
+            if (breaths >= maxBreaths) { 
+                breaths = 0; 
+                document.getElementById('balloon-kid').style.bottom = '0%'; 
+                document.getElementById('balloon-doc').style.bottom = '0%'; 
+                document.getElementById('status').innerText = 'Take a big breath!'; 
+                document.getElementById('controls').classList.remove('panic-mode');
+                document.getElementById('status').classList.remove('panic-text');
+                document.getElementById('breath-counter').innerText = `Breaths: 0/${maxBreaths}`;
+                return; 
+            }
+
+            breaths++; 
+            playBurnerSound(false);
+
+            document.getElementById('breath-counter').innerText = `Breaths: ${breaths}/${maxBreaths}`;
+
+            const kidBalloon = document.getElementById('balloon-kid'); const docBalloon = document.getElementById('balloon-doc');
+            const burnerKid = document.getElementById('burner-kid'); const burnerDoc = document.getElementById('burner-doc');
+            const controls = document.getElementById('controls'); const status = document.getElementById('status');
+            const kidName = document.getElementById('custom-name').value.trim() || 'You';
+
+            burnerKid.classList.add('active'); setTimeout(() => burnerKid.classList.remove('active'), 1000);
+
+            const kidProgress = (breaths / maxBreaths) * finishHeight;
+            let targetDocHeight = 0;
+
+            if (breaths <= 6) { targetDocHeight = (breaths / maxBreaths) * finishHeight * 0.8; }
+            else if (breaths <= 10) { targetDocHeight = kidProgress; }
+            else if (breaths <= 16) { const bobble = (breaths % 2 === 0) ? 2 : -1; targetDocHeight = kidProgress + bobble; }
+            else { targetDocHeight = (16 / maxBreaths) * finishHeight; }
+
+            kidBalloon.style.bottom = kidProgress + '%';
+            docBalloon.style.bottom = targetDocHeight + '%';
+
+            if (breaths >= 9 && breaths <= 16) {
+                setTimeout(() => {
+                    burnerDoc.classList.add('active'); playBurnerSound(true);
+                    setTimeout(() => burnerDoc.classList.remove('active'), 1000);
+                }, 300);
+            } else if (breaths < 17 && breaths % 2 === 0) {
+                setTimeout(() => {
+                    burnerDoc.classList.add('active'); 
+                    setTimeout(() => burnerDoc.classList.remove('active'), 600);
+                }, 400);
+            }
+
+            if (breaths === maxBreaths) { 
+                controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`; 
+                setTimeout(triggerConfetti, 300); 
+            } 
+            else if (breaths >= 10 && breaths <= 16) {
+                controls.classList.add('panic-mode'); status.classList.add('panic-text');
+                if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; } 
+                else { status.innerText = `⚠️ He's right next to you! Don't stop!`; }
+            }
+            else if (breaths === 17) {
+                controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                status.innerText = `Yes! You're pulling ahead! Final sprint!`;
+            }
+            else { 
+                controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                if (breaths < 6) status.innerText = `Great start! You're in the lead!`;
+                else if (breaths > 17) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
+                else status.innerText = `Keep taking big deep breaths!`;
+            }
+        }
+    </script>
+</body>
+</html>
