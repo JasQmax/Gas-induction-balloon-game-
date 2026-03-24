@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Balloon Remote Control</title>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
         body { margin: 0; height: 100vh; background: #2c3e50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; box-sizing: border-box; text-align: center; }
 
@@ -66,8 +66,9 @@
             document.getElementById('status-text').innerText = "Connecting...";
             activeTopic = 'anes-balloon/' + pin;
 
+            const clientId = 'phone_' + Math.random().toString(16).substring(2, 8);
             // Connect to public EMQX broker
-            client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+            client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', { clientId: clientId, keepalive: 60 });
 
             client.on('connect', () => {
                 // Send hello to wake up the tablet UI
