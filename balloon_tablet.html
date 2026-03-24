@@ -448,10 +448,10 @@
         }
 
         function takeBreath() {
-            if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial') return;
+            if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial' && gamePhase !== 'waiting') return;
 
-            // During tutorial: run a live demo (animate balloon + sound) without win condition
-            if (gamePhase === 'tutorial') {
+            // During tutorial or waiting (demo) phase: run a live demo (animate balloon + sound) without win condition
+            if (gamePhase === 'tutorial' || gamePhase === 'waiting') {
                 breaths++;
                 playBurnerSound(false);
                 document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
