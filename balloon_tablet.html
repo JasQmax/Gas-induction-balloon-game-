@@ -79,8 +79,8 @@
         .tutorial-dots { margin: 18px 0 10px; display: flex; justify-content: center; gap: 12px; }
         .dot { width: 13px; height: 13px; border-radius: 50%; background: #ddd; display: inline-block; transition: background 0.3s, transform 0.3s; }
         .dot.active { background: #4CAF50; transform: scale(1.25); }
-        @keyframes tutorialRise { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-55px); } }
-        .demo-balloon { animation: tutorialRise 2s ease-in-out infinite; display: inline-block; font-size: 72px; line-height: 1.2; }
+        .tutorial-live-track { width: 90px; height: 140px; background: linear-gradient(to top, #81C784 0%, #87CEEB 100%); border-radius: 10px; position: relative; overflow: hidden; margin: 5px auto; border-bottom: 4px solid #4CAF50; }
+        .tutorial-live-balloon { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); transition: bottom 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); }
 
         /* Countdown overlay */
         #countdown-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: background-color 0.6s; }
@@ -138,12 +138,26 @@
     <div id="tutorial-ui" class="modal-overlay hidden">
         <div class="modal-content tutorial-content">
             <div id="tutorial-step-0" class="tutorial-step">
-                <div class="tutorial-icon">🎈</div>
+                <div class="tutorial-icon">
+                    <svg width="72" height="90" viewBox="0 0 100 120">
+                        <path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
+                        <path d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
+                        <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
+                    </svg>
+                </div>
                 <h2>Welcome to the Balloon Race!</h2>
                 <p>You're going to race <strong>your balloon</strong> against Dr. Balloon!</p>
             </div>
             <div id="tutorial-step-1" class="tutorial-step hidden">
-                <div class="demo-balloon">🎈</div>
+                <div class="tutorial-live-track">
+                    <div id="tutorial-demo-balloon" class="tutorial-live-balloon">
+                        <svg width="60" height="75" viewBox="0 0 100 120">
+                            <path id="tutorial-demo-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
+                            <path id="tutorial-demo-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
+                            <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
+                        </svg>
+                    </div>
+                </div>
                 <h2>How to Play</h2>
                 <p>Take <strong>big deep breaths</strong> through your mask to make your balloon fly up!</p>
             </div>
@@ -268,6 +282,9 @@
             for (let slot = 0; slot < 5; slot++) {
                 document.getElementById(`game-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
             }
+            // Apply chosen colours to the tutorial demo balloon
+            document.getElementById('tutorial-demo-bg').setAttribute('fill', chosenBg);
+            document.getElementById('tutorial-demo-stripe').setAttribute('fill', chosenStripe);
             document.getElementById('customization-ui').classList.add('hidden');
 
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
@@ -290,6 +307,12 @@
                 document.getElementById('status').innerText = '🚀 Ask the doctor to press "START RACE"!';
                 document.getElementById('status').style.color = '#4CAF50';
                 return;
+            }
+            // Reset live demo state when entering step 1 for a fresh demo
+            if (currentTutorialStep === 1) {
+                breaths = 0;
+                document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
+                document.getElementById('tutorial-demo-balloon').style.bottom = '4px';
             }
             document.querySelectorAll('.tutorial-step').forEach((s, i) => {
                 s.classList.toggle('hidden', i !== currentTutorialStep);
@@ -422,6 +445,13 @@
                 const burnerKid = document.getElementById('burner-kid');
                 burnerKid.classList.add('active');
                 setTimeout(() => burnerKid.classList.remove('active'), 1000);
+                // Animate the live demo balloon inside the tutorial panel (step 1)
+                if (currentTutorialStep === 1) {
+                    // Track is 140px tall, balloon SVG is 75px, baseline offset is 4px → max rise = 140 - 75 - 4 = 61px
+                    const maxDemoRise = 140 - 75 - 4;
+                    const demoPos = Math.min(breaths * 3 + 4, maxDemoRise);
+                    document.getElementById('tutorial-demo-balloon').style.bottom = demoPos + 'px';
+                }
                 // Cap balloon just below finish line so it never accidentally crosses during demo
                 const demoProgress = Math.min((breaths / maxBreaths) * finishHeight, finishHeight - 4);
                 document.getElementById('balloon-kid').style.bottom = demoProgress + '%';
