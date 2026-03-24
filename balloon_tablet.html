@@ -246,7 +246,7 @@
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
         const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸'];
         const selectedStickers = new Set();
-        let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'countdown' | 'racing'
+        let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'trial' | 'countdown' | 'racing'
         let currentTutorialStep = 0;
         const TUTORIAL_TOTAL = 4;
 
@@ -366,6 +366,18 @@
             showStep();
         }
 
+        function startTrialRun() {
+            breaths = 0;
+            document.getElementById('balloon-kid').style.bottom = '0%';
+            document.getElementById('balloon-doc').style.bottom = '0%';
+            document.getElementById('breath-counter').innerText = `Trial: 0/${maxBreaths}`;
+            document.getElementById('controls').classList.remove('panic-mode');
+            document.getElementById('status').classList.remove('panic-text');
+            gamePhase = 'trial';
+            document.getElementById('status').innerText = '🎈 Trial Run! Practice your big breaths!';
+            document.getElementById('status').style.color = '#E65100';
+        }
+
         const pin = Math.floor(1000 + Math.random() * 9000).toString();
         const topic = 'anes-balloon/' + pin;
         document.getElementById('stealth-pin').innerText = pin;
@@ -385,7 +397,8 @@
                 document.getElementById('conn-indicator').style.color = '#4CAF50';
                 document.getElementById('stealth-pin').style.color = '#4CAF50';
             }
-            if (message.toString() === 'START' && gamePhase === 'waiting') { showCountdown(); }
+            if (message.toString() === 'START' && (gamePhase === 'waiting' || gamePhase === 'trial')) { showCountdown(); }
+            if (message.toString() === 'TRIAL' && (gamePhase === 'waiting' || gamePhase === 'trial')) { startTrialRun(); }
             if (message.toString() === 'BREATH') { takeBreath(); }
         });
 
@@ -435,7 +448,7 @@
         }
 
         function takeBreath() {
-            if (gamePhase !== 'racing' && gamePhase !== 'tutorial') return;
+            if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial') return;
 
             // During tutorial: run a live demo (animate balloon + sound) without win condition
             if (gamePhase === 'tutorial') {
@@ -462,17 +475,17 @@
                 breaths = 0; 
                 document.getElementById('balloon-kid').style.bottom = '0%'; 
                 document.getElementById('balloon-doc').style.bottom = '0%'; 
-                document.getElementById('status').innerText = 'Take a big breath!'; 
+                document.getElementById('status').innerText = gamePhase === 'trial' ? '🎈 Trial Run! Practice your big breaths!' : 'Take a big breath!'; 
                 document.getElementById('controls').classList.remove('panic-mode');
                 document.getElementById('status').classList.remove('panic-text');
-                document.getElementById('breath-counter').innerText = `Breaths: 0/${maxBreaths}`;
+                document.getElementById('breath-counter').innerText = `${gamePhase === 'trial' ? 'Trial' : 'Breaths'}: 0/${maxBreaths}`;
                 return; 
             }
 
             breaths++; 
             playBurnerSound(false);
 
-            document.getElementById('breath-counter').innerText = `Breaths: ${breaths}/${maxBreaths}`;
+            document.getElementById('breath-counter').innerText = `${gamePhase === 'trial' ? 'Trial' : 'Breaths'}: ${breaths}/${maxBreaths}`;
 
             const kidBalloon = document.getElementById('balloon-kid'); const docBalloon = document.getElementById('balloon-doc');
             const burnerKid = document.getElementById('burner-kid'); const burnerDoc = document.getElementById('burner-doc');
@@ -504,25 +517,41 @@
                 }, 400);
             }
 
-            if (breaths === maxBreaths) { 
+            if (gamePhase === 'trial') {
                 controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`; 
-                setTimeout(triggerConfetti, 300); 
-            } 
-            else if (breaths >= 10 && breaths <= 16) {
-                controls.classList.add('panic-mode'); status.classList.add('panic-text');
-                if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; } 
-                else { status.innerText = `⚠️ He's right next to you! Don't stop!`; }
-            }
-            else if (breaths === 17) {
-                controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                status.innerText = `Yes! You're pulling ahead! Final sprint!`;
-            }
-            else { 
-                controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                if (breaths < 6) status.innerText = `Great start! You're in the lead!`;
-                else if (breaths > 17) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
-                else status.innerText = `Keep taking big deep breaths!`;
+                if (breaths === maxBreaths) {
+                    status.innerText = `🎉 Great practice, ${kidName}! Ask the doctor to start the real race!`;
+                } else if (breaths >= 10 && breaths <= 16) {
+                    if (breaths % 2 === 0) { status.innerText = `👍 You're doing great — keep those big breaths going!`; }
+                    else { status.innerText = `💪 Excellent! Big breaths win the race!`; }
+                } else if (breaths === 17) {
+                    status.innerText = `🌟 Almost there! Just a few more breaths!`;
+                } else {
+                    if (breaths < 6) status.innerText = `🎈 Good start! Keep going!`;
+                    else if (breaths > 17) status.innerText = `🔥 Almost done — ${maxBreaths - breaths} more!`;
+                    else status.innerText = `🎈 Nice breath! Keep practicing!`;
+                }
+            } else {
+                if (breaths === maxBreaths) { 
+                    controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                    status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`; 
+                    setTimeout(triggerConfetti, 300); 
+                } 
+                else if (breaths >= 10 && breaths <= 16) {
+                    controls.classList.add('panic-mode'); status.classList.add('panic-text');
+                    if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; } 
+                    else { status.innerText = `⚠️ He's right next to you! Don't stop!`; }
+                }
+                else if (breaths === 17) {
+                    controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                    status.innerText = `Yes! You're pulling ahead! Final sprint!`;
+                }
+                else { 
+                    controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
+                    if (breaths < 6) status.innerText = `Great start! You're in the lead!`;
+                    else if (breaths > 17) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
+                    else status.innerText = `Keep taking big deep breaths!`;
+                }
             }
         }
     </script>
