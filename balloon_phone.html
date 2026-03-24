@@ -26,15 +26,6 @@
 
         .divider { width: 80%; border: none; border-top: 2px solid rgba(255,255,255,0.15); margin: 16px 0; }
 
-        #trial-run-btn {
-            width: 180px; height: 60px; border-radius: 30px; background: #e67e22;
-            border: 4px solid #ca6f1e; color: white; font-size: 18px; font-weight: bold;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
-            -webkit-tap-highlight-color: transparent; outline: none; letter-spacing: 0.5px;
-        }
-        #trial-run-btn:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(0,0,0,0.4); background: #ca6f1e; }
-        #trial-run-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
-
         #big-breath-btn { 
             width: 220px; height: 220px; border-radius: 50%; background: #e74c3c; 
             border: 10px solid #c0392b; color: white; font-size: 38px; font-weight: bold; 
@@ -59,11 +50,9 @@
     <div id="controller-ui">
         <button id="start-race-btn" onclick="sendStart()">🚀<br>START<br>RACE</button>
         <hr class="divider">
-        <button id="trial-run-btn" onclick="sendTrialRun()">🎈 TRIAL RUN</button>
-        <hr class="divider">
         <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
         <div id="status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
-        <div id="phase-hint">Tap BREATH to demonstrate during the tutorial, then tap TRIAL RUN so the child can practice, or tap START RACE when the child is ready.</div>
+        <div id="phase-hint">Tap BREATH to demonstrate during the tutorial. Once the child has practiced, tap START RACE when they are ready for the real race.</div>
     </div>
 
     <script>
@@ -101,29 +90,14 @@
             }
         }
 
-        function sendTrialRun() {
-            if (client && client.connected) {
-                client.publish(activeTopic, 'TRIAL');
-                if (navigator.vibrate) navigator.vibrate(80);
-                updateButtonStates('trial');
-            }
-        }
-
         function updateButtonStates(phase) {
             const startBtn = document.getElementById('start-race-btn');
-            const trialBtn = document.getElementById('trial-run-btn');
             const hint = document.getElementById('phase-hint');
             const statusEl = document.getElementById('status-text');
             if (phase === 'racing') {
                 startBtn.disabled = true;
-                trialBtn.disabled = true;
                 hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
                 statusEl.innerText = '🏁 Race started!';
-            } else if (phase === 'trial') {
-                startBtn.disabled = false;
-                trialBtn.disabled = false;
-                hint.textContent = 'Trial run in progress! Press BREATH for each practice breath. Tap START RACE when the child is ready for the real race.';
-                statusEl.innerText = '🎈 Trial run started!';
             }
         }
 
