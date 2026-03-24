@@ -112,16 +112,19 @@
         function updateButtonStates(phase) {
             const startBtn = document.getElementById('start-race-btn');
             const trialBtn = document.getElementById('trial-run-btn');
+            const breathBtn = document.getElementById('big-breath-btn');
             const hint = document.getElementById('phase-hint');
             const statusEl = document.getElementById('status-text');
             if (phase === 'racing') {
                 startBtn.disabled = true;
-                trialBtn.disabled = true;
-                hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
+                trialBtn.disabled = false;
+                breathBtn.disabled = false;
+                hint.textContent = 'Race in progress! Press BREATH for each big breath. Tap TRIAL RUN to switch to practice mode.';
                 statusEl.innerText = '🏁 Race started!';
             } else if (phase === 'trial') {
                 startBtn.disabled = false;
                 trialBtn.disabled = false;
+                breathBtn.disabled = false;
                 hint.textContent = 'Trial run in progress! Press BREATH for each practice breath. Tap START RACE when the child is ready for the real race.';
                 statusEl.innerText = '🎈 Trial run started!';
             }

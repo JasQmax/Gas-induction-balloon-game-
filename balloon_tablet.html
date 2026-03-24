@@ -298,20 +298,27 @@
             document.getElementById('status').style.color = '#2196F3';
         }
 
+        function resetDemoState() {
+            breaths = 0;
+            document.getElementById('balloon-kid').style.bottom = '0%';
+            document.getElementById('breath-counter').innerText = `Demo: 0`;
+        }
+
         function tutorialNext() {
             currentTutorialStep++;
             if (currentTutorialStep >= TUTORIAL_TOTAL) {
                 // Tutorial complete — wait for doctor's start signal
                 document.getElementById('tutorial-ui').classList.add('hidden');
                 gamePhase = 'waiting';
+                // Reset demo state so doctor can demo breathing on the main screen
+                resetDemoState();
                 document.getElementById('status').innerText = '🚀 Ask the doctor to press "START RACE"!';
                 document.getElementById('status').style.color = '#4CAF50';
                 return;
             }
             // Reset live demo state when entering step 1 for a fresh demo
             if (currentTutorialStep === 1) {
-                breaths = 0;
-                document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
+                resetDemoState();
                 document.getElementById('tutorial-demo-balloon').style.bottom = '4px';
             }
             document.querySelectorAll('.tutorial-step').forEach((s, i) => {
@@ -398,7 +405,7 @@
                 document.getElementById('stealth-pin').style.color = '#4CAF50';
             }
             if (message.toString() === 'START' && (gamePhase === 'waiting' || gamePhase === 'trial')) { showCountdown(); }
-            if (message.toString() === 'TRIAL' && (gamePhase === 'waiting' || gamePhase === 'trial')) { startTrialRun(); }
+            if (message.toString() === 'TRIAL' && (gamePhase === 'waiting' || gamePhase === 'trial' || gamePhase === 'racing')) { startTrialRun(); }
             if (message.toString() === 'BREATH') { takeBreath(); }
         });
 
@@ -448,10 +455,10 @@
         }
 
         function takeBreath() {
-            if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial') return;
+            if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial' && gamePhase !== 'waiting') return;
 
-            // During tutorial: run a live demo (animate balloon + sound) without win condition
-            if (gamePhase === 'tutorial') {
+            // During tutorial or waiting: run a live demo (animate balloon + sound) without win condition
+            if (gamePhase === 'tutorial' || gamePhase === 'waiting') {
                 breaths++;
                 playBurnerSound(false);
                 document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
