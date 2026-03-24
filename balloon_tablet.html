@@ -272,8 +272,9 @@
 
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
 
-            // Show tutorial
+            // Show tutorial (reset demo counter for a fresh experience)
             gamePhase = 'tutorial';
+            breaths = 0;
             currentTutorialStep = 0;
             document.getElementById('tutorial-ui').classList.remove('hidden');
             document.getElementById('status').innerText = '📚 Let\'s learn how to play!';
@@ -286,8 +287,8 @@
                 // Tutorial complete — wait for doctor's start signal
                 document.getElementById('tutorial-ui').classList.add('hidden');
                 gamePhase = 'waiting';
-                document.getElementById('status').innerText = '⏳ Waiting for the doctor to start the race…';
-                document.getElementById('status').style.color = '#FF9800';
+                document.getElementById('status').innerText = '🚀 Ask the doctor to press "START RACE"!';
+                document.getElementById('status').style.color = '#4CAF50';
                 return;
             }
             document.querySelectorAll('.tutorial-step').forEach((s, i) => {
@@ -303,6 +304,14 @@
 
         function showCountdown() {
             gamePhase = 'countdown';
+            // Reset any demo breaths so the real race starts from zero
+            breaths = 0;
+            document.getElementById('balloon-kid').style.bottom = '0%';
+            document.getElementById('balloon-doc').style.bottom = '0%';
+            document.getElementById('breath-counter').innerText = `Breaths: 0/${maxBreaths}`;
+            document.getElementById('controls').classList.remove('panic-mode');
+            document.getElementById('status').classList.remove('panic-text');
+
             const overlay = document.getElementById('countdown-overlay');
             const text = document.getElementById('countdown-text');
             overlay.classList.remove('hidden');
@@ -403,7 +412,22 @@
         }
 
         function takeBreath() {
-            if (gamePhase !== 'racing') return;
+            if (gamePhase !== 'racing' && gamePhase !== 'tutorial') return;
+
+            // During tutorial: run a live demo (animate balloon + sound) without win condition
+            if (gamePhase === 'tutorial') {
+                breaths++;
+                playBurnerSound(false);
+                document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
+                const burnerKid = document.getElementById('burner-kid');
+                burnerKid.classList.add('active');
+                setTimeout(() => burnerKid.classList.remove('active'), 1000);
+                // Cap balloon just below finish line so it never accidentally crosses during demo
+                const demoProgress = Math.min((breaths / maxBreaths) * finishHeight, finishHeight - 4);
+                document.getElementById('balloon-kid').style.bottom = demoProgress + '%';
+                return;
+            }
+
             if (breaths >= maxBreaths) { 
                 breaths = 0; 
                 document.getElementById('balloon-kid').style.bottom = '0%'; 

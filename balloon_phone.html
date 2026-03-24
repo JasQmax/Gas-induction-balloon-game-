@@ -50,9 +50,9 @@
     <div id="controller-ui">
         <button id="start-race-btn" onclick="sendStart()">🚀<br>START<br>RACE</button>
         <hr class="divider">
-        <button id="big-breath-btn" onclick="sendBreath()" disabled>BREATH!</button>
+        <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
         <div id="status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
-        <div id="phase-hint">Press START RACE after the child has finished the tutorial on the tablet.</div>
+        <div id="phase-hint">Tap BREATH to demonstrate during the tutorial, then tap START RACE when the child is ready.</div>
     </div>
 
     <script>
@@ -92,12 +92,10 @@
 
         function updateButtonStates(phase) {
             const startBtn = document.getElementById('start-race-btn');
-            const breathBtn = document.getElementById('big-breath-btn');
             const hint = document.getElementById('phase-hint');
             const statusEl = document.getElementById('status-text');
             if (phase === 'racing') {
                 startBtn.disabled = true;
-                breathBtn.disabled = false;
                 hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
                 statusEl.innerText = '🏁 Race started!';
             }
