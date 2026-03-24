@@ -86,10 +86,20 @@
             if (client && client.connected) {
                 client.publish(activeTopic, 'START');
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                document.getElementById('start-race-btn').disabled = true;
-                document.getElementById('big-breath-btn').disabled = false;
-                document.getElementById('phase-hint').textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
-                document.getElementById('status-text').innerText = '🏁 Race started!';
+                updateButtonStates('racing');
+            }
+        }
+
+        function updateButtonStates(phase) {
+            const startBtn = document.getElementById('start-race-btn');
+            const breathBtn = document.getElementById('big-breath-btn');
+            const hint = document.getElementById('phase-hint');
+            const statusEl = document.getElementById('status-text');
+            if (phase === 'racing') {
+                startBtn.disabled = true;
+                breathBtn.disabled = false;
+                hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
+                statusEl.innerText = '🏁 Race started!';
             }
         }
 

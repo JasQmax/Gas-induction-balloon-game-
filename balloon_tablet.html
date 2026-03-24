@@ -325,7 +325,7 @@
                 overlay.style.backgroundColor = steps[i].bg;
                 text.textContent = steps[i].label;
                 text.classList.remove('count-animate');
-                void text.offsetWidth; // trigger reflow to restart animation
+                text.offsetWidth; // trigger reflow to restart animation
                 text.classList.add('count-animate');
                 const delay = i < steps.length - 1 ? 2000 : 1500;
                 i++;
