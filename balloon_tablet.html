@@ -23,7 +23,7 @@
         .color-btn.selected { border-color: #333; transform: scale(1.1); }
         .sticker-row { display: flex; justify-content: center; gap: 12px; margin: 10px 0 20px; flex-wrap: wrap; }
         .sticker-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 24px; padding: 0; }
-        .sticker-btn.selected { border-color: #333; transform: scale(1.1); }
+        .sticker-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
         .sticker-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
         .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
@@ -84,7 +84,11 @@
             <svg id="preview-balloon" width="120" height="150" viewBox="0 0 100 120">
                 <path id="prev-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
                 <path id="prev-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
-                <text id="prev-sticker" x="50" y="52" text-anchor="middle" dominant-baseline="middle" font-size="24"></text>
+                <text id="prev-sticker-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                <text id="prev-sticker-1" x="68" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                <text id="prev-sticker-2" x="50" y="55" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                <text id="prev-sticker-3" x="32" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                <text id="prev-sticker-4" x="68" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
                 <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
             </svg>
             <input type="text" id="custom-name" placeholder="What is your name?" autocomplete="off" maxlength="12">
@@ -96,14 +100,13 @@
                 <div class="color-btn" style="background: #9C27B0;" onclick="selectColor(this, '#E1BEE7', '#9C27B0')"></div>
                 <div class="color-btn" style="background: #E91E63;" onclick="selectColor(this, '#F8BBD0', '#E91E63')"></div>
             </div>
-            <p style="margin:5px 0 0; color:#666; font-size:14px;">Add a sticker:</p>
+            <p style="margin:5px 0 0; color:#666; font-size:14px;">Add stickers (pick as many as you like!):</p>
             <div class="sticker-row">
-                <button type="button" class="sticker-btn selected" onclick="selectSticker(this, '')" aria-label="No sticker">—</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, '⭐')" aria-label="Star sticker">⭐</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, '❤️')" aria-label="Heart sticker">❤️</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, '🌟')" aria-label="Sparkle sticker">🌟</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, '🦋')" aria-label="Butterfly sticker">🦋</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, '🌈')" aria-label="Rainbow sticker">🌈</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 0)" aria-label="Star sticker">⭐</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 1)" aria-label="Heart sticker">❤️</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 2)" aria-label="Sparkle sticker">🌟</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 3)" aria-label="Butterfly sticker">🦋</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 4)" aria-label="Rainbow sticker">🌈</button>
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
         </div>
@@ -148,7 +151,16 @@
 
         <div class="track">
             <div id="balloon-kid" class="balloon-container floating">
-                <svg width="100" height="130" viewBox="0 0 100 120"><path id="game-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/><path id="game-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/><text id="game-sticker" x="50" y="52" text-anchor="middle" dominant-baseline="middle" font-size="24"></text><rect x="40" y="105" width="20" height="15" fill="#5D4037"/></svg>
+                <svg width="100" height="130" viewBox="0 0 100 120">
+                    <path id="game-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
+                    <path id="game-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
+                    <text id="game-sticker-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-1" x="68" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-2" x="50" y="55" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-3" x="32" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-4" x="68" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
+                </svg>
                 <div class="burner" id="burner-kid"></div><div id="kid-label" class="label">You!</div>
             </div>
         </div>
@@ -157,25 +169,40 @@
     <div id="controls"><div id="status">Let's get ready!</div></div>
 
     <script>
-        let chosenBg = '#FFC107'; let chosenStripe = '#FF5252'; let chosenSticker = '';
+        let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
+        const STICKERS = ['⭐', '❤️', '🌟', '🦋', '🌈'];
+        const selectedStickers = new Set();
+
         function selectColor(btn, bg, stripe) {
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected'); chosenBg = bg; chosenStripe = stripe;
             document.getElementById('prev-bg').setAttribute('fill', bg); document.getElementById('prev-stripe').setAttribute('fill', stripe);
         }
 
-        function selectSticker(btn, sticker) {
-            document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            chosenSticker = sticker;
-            document.getElementById('prev-sticker').textContent = sticker;
+        function selectSticker(btn, index) {
+            if (selectedStickers.has(index)) {
+                selectedStickers.delete(index);
+                btn.classList.remove('selected');
+            } else {
+                selectedStickers.add(index);
+                btn.classList.add('selected');
+            }
+            updateStickerPreview();
+        }
+
+        function updateStickerPreview() {
+            STICKERS.forEach((emoji, i) => {
+                document.getElementById(`prev-sticker-${i}`).textContent = selectedStickers.has(i) ? emoji : '';
+            });
         }
 
         function finishCustomization() {
             const kidName = document.getElementById('custom-name').value.trim() || 'You!';
             document.getElementById('kid-label').innerText = kidName;
             document.getElementById('game-bg').setAttribute('fill', chosenBg); document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
-            document.getElementById('game-sticker').textContent = chosenSticker;
+            STICKERS.forEach((emoji, i) => {
+                document.getElementById(`game-sticker-${i}`).textContent = selectedStickers.has(i) ? emoji : '';
+            });
             document.getElementById('customization-ui').classList.add('hidden');
             document.getElementById('status').innerText = 'Take a big breath to start the race!';
             document.getElementById('status').style.color = '#4CAF50';
