@@ -13,16 +13,30 @@
         input { font-size: 36px; padding: 15px; width: 100%; text-align: center; letter-spacing: 5px; border-radius: 10px; border: none; margin-bottom: 20px; font-weight: bold; outline: none; }
         .btn-connect { background: #2ecc71; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
 
-        #controller-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        #controller-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+
+        #start-race-btn {
+            width: 220px; height: 220px; border-radius: 50%; background: #27ae60;
+            border: 10px solid #1e8449; color: white; font-size: 26px; font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+            -webkit-tap-highlight-color: transparent; outline: none; line-height: 1.3;
+        }
+        #start-race-btn:active { transform: scale(0.92); box-shadow: 0 5px 10px rgba(0,0,0,0.5); background: #1e8449; }
+        #start-race-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+        .divider { width: 80%; border: none; border-top: 2px solid rgba(255,255,255,0.15); margin: 22px 0; }
+
         #big-breath-btn { 
-            width: 250px; height: 250px; border-radius: 50%; background: #e74c3c; 
-            border: 10px solid #c0392b; color: white; font-size: 40px; font-weight: bold; 
+            width: 220px; height: 220px; border-radius: 50%; background: #e74c3c; 
+            border: 10px solid #c0392b; color: white; font-size: 38px; font-weight: bold; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; 
             -webkit-tap-highlight-color: transparent; outline: none;
         }
         #big-breath-btn:active { transform: scale(0.92); box-shadow: 0 5px 10px rgba(0,0,0,0.5); background: #c0392b; }
+        #big-breath-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
 
-        #status-text { margin-top: 30px; font-size: 20px; font-weight: bold; }
+        #status-text { margin-top: 16px; font-size: 18px; font-weight: bold; }
+        #phase-hint { margin-top: 8px; font-size: 14px; color: #95a5a6; max-width: 260px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -34,8 +48,11 @@
     </div>
 
     <div id="controller-ui">
+        <button id="start-race-btn" onclick="sendStart()">🚀<br>START<br>RACE</button>
+        <hr class="divider">
         <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
         <div id="status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
+        <div id="phase-hint">Tap BREATH to demonstrate during the tutorial, then tap START RACE when the child is ready.</div>
     </div>
 
     <script>
@@ -63,6 +80,25 @@
             client.on('error', (err) => {
                 document.getElementById('status-text').innerText = "Failed to connect.";
             });
+        }
+
+        function sendStart() {
+            if (client && client.connected) {
+                client.publish(activeTopic, 'START');
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                updateButtonStates('racing');
+            }
+        }
+
+        function updateButtonStates(phase) {
+            const startBtn = document.getElementById('start-race-btn');
+            const hint = document.getElementById('phase-hint');
+            const statusEl = document.getElementById('status-text');
+            if (phase === 'racing') {
+                startBtn.disabled = true;
+                hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
+                statusEl.innerText = '🏁 Race started!';
+            }
         }
 
         function sendBreath() {

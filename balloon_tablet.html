@@ -69,6 +69,24 @@
         .panic-text { color: #d32f2f !important; font-size: 26px !important; }
 
         #breath-counter { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 18px; z-index: 50; }
+
+        /* Tutorial */
+        .tutorial-content { max-width: 480px; padding: 30px 30px 20px; }
+        .tutorial-step { text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .tutorial-icon { font-size: 80px; margin: 5px 0; line-height: 1.1; }
+        .tutorial-step h2 { font-size: 28px; color: #333; margin: 10px 0 8px; }
+        .tutorial-step p { font-size: 20px; color: #555; line-height: 1.5; margin: 0; }
+        .tutorial-dots { margin: 18px 0 10px; display: flex; justify-content: center; gap: 12px; }
+        .dot { width: 13px; height: 13px; border-radius: 50%; background: #ddd; display: inline-block; transition: background 0.3s, transform 0.3s; }
+        .dot.active { background: #4CAF50; transform: scale(1.25); }
+        @keyframes tutorialRise { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-55px); } }
+        .demo-balloon { animation: tutorialRise 2s ease-in-out infinite; display: inline-block; font-size: 72px; line-height: 1.2; }
+
+        /* Countdown overlay */
+        #countdown-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: background-color 0.6s; }
+        #countdown-text { font-size: 86px; font-weight: bold; color: white; text-shadow: 0 4px 24px rgba(0,0,0,0.25); text-align: center; }
+        @keyframes countPulse { 0% { transform: scale(0.4); opacity: 0; } 65% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+        .count-animate { animation: countPulse 0.55s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -114,6 +132,44 @@
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
         </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorial-ui" class="modal-overlay hidden">
+        <div class="modal-content tutorial-content">
+            <div id="tutorial-step-0" class="tutorial-step">
+                <div class="tutorial-icon">🎈</div>
+                <h2>Welcome to the Balloon Race!</h2>
+                <p>You're going to race <strong>your balloon</strong> against Dr. Balloon!</p>
+            </div>
+            <div id="tutorial-step-1" class="tutorial-step hidden">
+                <div class="demo-balloon">🎈</div>
+                <h2>How to Play</h2>
+                <p>Take <strong>big deep breaths</strong> through your mask to make your balloon fly up!</p>
+            </div>
+            <div id="tutorial-step-2" class="tutorial-step hidden">
+                <div class="tutorial-icon">🏁</div>
+                <h2>Reach the Finish Line!</h2>
+                <p>The <strong>first balloon</strong> to reach the top wins the race! 🏆</p>
+            </div>
+            <div id="tutorial-step-3" class="tutorial-step hidden">
+                <div class="tutorial-icon">🩺</div>
+                <h2>Listen for "GO!"</h2>
+                <p>When the doctor gives the signal, start taking those <strong>big deep breaths!</strong></p>
+            </div>
+            <div class="tutorial-dots">
+                <span class="dot active" id="dot-0"></span>
+                <span class="dot" id="dot-1"></span>
+                <span class="dot" id="dot-2"></span>
+                <span class="dot" id="dot-3"></span>
+            </div>
+            <button class="btn-primary" id="tutorial-btn" onclick="tutorialNext()">Next →</button>
+        </div>
+    </div>
+
+    <!-- Ready / Get Set / Go overlay -->
+    <div id="countdown-overlay" class="hidden">
+        <div id="countdown-text"></div>
     </div>
 
     <div id="sky">
@@ -176,6 +232,9 @@
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
         const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸'];
         const selectedStickers = new Set();
+        let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'countdown' | 'racing'
+        let currentTutorialStep = 0;
+        const TUTORIAL_TOTAL = 4;
 
         function selectColor(btn, bg, stripe) {
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
@@ -210,10 +269,78 @@
                 document.getElementById(`game-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
             }
             document.getElementById('customization-ui').classList.add('hidden');
-            document.getElementById('status').innerText = 'Take a big breath to start the race!';
-            document.getElementById('status').style.color = '#4CAF50';
 
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+
+            // Show tutorial (reset demo counter for a fresh experience)
+            gamePhase = 'tutorial';
+            breaths = 0;
+            currentTutorialStep = 0;
+            document.getElementById('tutorial-ui').classList.remove('hidden');
+            document.getElementById('status').innerText = '📚 Let\'s learn how to play!';
+            document.getElementById('status').style.color = '#2196F3';
+        }
+
+        function tutorialNext() {
+            currentTutorialStep++;
+            if (currentTutorialStep >= TUTORIAL_TOTAL) {
+                // Tutorial complete — wait for doctor's start signal
+                document.getElementById('tutorial-ui').classList.add('hidden');
+                gamePhase = 'waiting';
+                document.getElementById('status').innerText = '🚀 Ask the doctor to press "START RACE"!';
+                document.getElementById('status').style.color = '#4CAF50';
+                return;
+            }
+            document.querySelectorAll('.tutorial-step').forEach((s, i) => {
+                s.classList.toggle('hidden', i !== currentTutorialStep);
+            });
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('active', i === currentTutorialStep);
+            });
+            if (currentTutorialStep === TUTORIAL_TOTAL - 1) {
+                document.getElementById('tutorial-btn').innerText = "I'm Ready! 🚀";
+            }
+        }
+
+        function showCountdown() {
+            gamePhase = 'countdown';
+            // Reset any demo breaths so the real race starts from zero
+            breaths = 0;
+            document.getElementById('balloon-kid').style.bottom = '0%';
+            document.getElementById('balloon-doc').style.bottom = '0%';
+            document.getElementById('breath-counter').innerText = `Breaths: 0/${maxBreaths}`;
+            document.getElementById('controls').classList.remove('panic-mode');
+            document.getElementById('status').classList.remove('panic-text');
+
+            const overlay = document.getElementById('countdown-overlay');
+            const text = document.getElementById('countdown-text');
+            overlay.classList.remove('hidden');
+
+            const steps = [
+                { label: 'READY…', bg: '#E65100' },
+                { label: 'GET SET…', bg: '#F9A825' },
+                { label: 'GO! 🎈', bg: '#2E7D32' },
+            ];
+
+            let i = 0;
+            function showStep() {
+                if (i >= steps.length) {
+                    overlay.classList.add('hidden');
+                    gamePhase = 'racing';
+                    document.getElementById('status').innerText = 'Take a big breath to start the race!';
+                    document.getElementById('status').style.color = '#4CAF50';
+                    return;
+                }
+                overlay.style.backgroundColor = steps[i].bg;
+                text.textContent = steps[i].label;
+                text.classList.remove('count-animate');
+                text.offsetWidth; // trigger reflow to restart animation
+                text.classList.add('count-animate');
+                const delay = i < steps.length - 1 ? 2000 : 1500;
+                i++;
+                setTimeout(showStep, delay);
+            }
+            showStep();
         }
 
         const pin = Math.floor(1000 + Math.random() * 9000).toString();
@@ -235,6 +362,7 @@
                 document.getElementById('conn-indicator').style.color = '#4CAF50';
                 document.getElementById('stealth-pin').style.color = '#4CAF50';
             }
+            if (message.toString() === 'START' && gamePhase === 'waiting') { showCountdown(); }
             if (message.toString() === 'BREATH') { takeBreath(); }
         });
 
@@ -284,7 +412,22 @@
         }
 
         function takeBreath() {
-            if (!document.getElementById('customization-ui').classList.contains('hidden')) return;
+            if (gamePhase !== 'racing' && gamePhase !== 'tutorial') return;
+
+            // During tutorial: run a live demo (animate balloon + sound) without win condition
+            if (gamePhase === 'tutorial') {
+                breaths++;
+                playBurnerSound(false);
+                document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
+                const burnerKid = document.getElementById('burner-kid');
+                burnerKid.classList.add('active');
+                setTimeout(() => burnerKid.classList.remove('active'), 1000);
+                // Cap balloon just below finish line so it never accidentally crosses during demo
+                const demoProgress = Math.min((breaths / maxBreaths) * finishHeight, finishHeight - 4);
+                document.getElementById('balloon-kid').style.bottom = demoProgress + '%';
+                return;
+            }
+
             if (breaths >= maxBreaths) { 
                 breaths = 0; 
                 document.getElementById('balloon-kid').style.bottom = '0%'; 
