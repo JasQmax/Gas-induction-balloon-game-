@@ -301,11 +301,9 @@
         function tutorialNext() {
             currentTutorialStep++;
             if (currentTutorialStep >= TUTORIAL_TOTAL) {
-                // Tutorial complete — wait for doctor's start signal
+                // Tutorial complete — automatically start practice/trial so the child can practise
                 document.getElementById('tutorial-ui').classList.add('hidden');
-                gamePhase = 'waiting';
-                document.getElementById('status').innerText = '🚀 Ask the doctor to press "START RACE"!';
-                document.getElementById('status').style.color = '#4CAF50';
+                startTrialRun();
                 return;
             }
             // Reset live demo state when entering step 1 for a fresh demo
@@ -374,7 +372,7 @@
             document.getElementById('controls').classList.remove('panic-mode');
             document.getElementById('status').classList.remove('panic-text');
             gamePhase = 'trial';
-            document.getElementById('status').innerText = '🎈 Trial Run! Practice your big breaths!';
+            document.getElementById('status').innerText = '🎈 Practice time! Take big breaths — the doctor will start the race when you\'re ready!';
             document.getElementById('status').style.color = '#E65100';
         }
 
