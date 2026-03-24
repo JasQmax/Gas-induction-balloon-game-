@@ -100,13 +100,17 @@
                 <div class="color-btn" style="background: #9C27B0;" onclick="selectColor(this, '#E1BEE7', '#9C27B0')"></div>
                 <div class="color-btn" style="background: #E91E63;" onclick="selectColor(this, '#F8BBD0', '#E91E63')"></div>
             </div>
-            <p style="margin:5px 0 0; color:#666; font-size:14px;">Add stickers (pick as many as you like!):</p>
+            <p style="margin:5px 0 0; color:#666; font-size:14px;">Add stickers (up to 5 will show on your balloon!):</p>
             <div class="sticker-row">
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 0)" aria-label="Car sticker">🚗</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 1)" aria-label="Ambulance sticker">🚑</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 2)" aria-label="Fire engine sticker">🚒</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 3)" aria-label="Silly face sticker">🤪</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 4)" aria-label="Star sticker">⭐</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 5)" aria-label="Rainbow sticker">🌈</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 6)" aria-label="Heart sticker">❤️</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 7)" aria-label="Butterfly sticker">🦋</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 8)" aria-label="Flower sticker">🌸</button>
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
         </div>
@@ -170,7 +174,7 @@
 
     <script>
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
-        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐'];
+        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸'];
         const selectedStickers = new Set();
 
         function selectColor(btn, bg, stripe) {
@@ -191,18 +195,20 @@
         }
 
         function updateStickerPreview() {
-            STICKERS.forEach((emoji, i) => {
-                document.getElementById(`prev-sticker-${i}`).textContent = selectedStickers.has(i) ? emoji : '';
-            });
+            const selected = [...selectedStickers].sort((a, b) => a - b);
+            for (let slot = 0; slot < 5; slot++) {
+                document.getElementById(`prev-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
+            }
         }
 
         function finishCustomization() {
             const kidName = document.getElementById('custom-name').value.trim() || 'You!';
             document.getElementById('kid-label').innerText = kidName;
             document.getElementById('game-bg').setAttribute('fill', chosenBg); document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
-            STICKERS.forEach((emoji, i) => {
-                document.getElementById(`game-sticker-${i}`).textContent = selectedStickers.has(i) ? emoji : '';
-            });
+            const selected = [...selectedStickers].sort((a, b) => a - b);
+            for (let slot = 0; slot < 5; slot++) {
+                document.getElementById(`game-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
+            }
             document.getElementById('customization-ui').classList.add('hidden');
             document.getElementById('status').innerText = 'Take a big breath to start the race!';
             document.getElementById('status').style.color = '#4CAF50';
