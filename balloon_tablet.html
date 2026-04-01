@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hot Air Balloon - TABLET (20 Breaths)</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R8RQEKSQL1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-R8RQEKSQL1');
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
@@ -393,6 +401,10 @@
                 document.getElementById('conn-indicator').innerText = "📱 Paired";
                 document.getElementById('conn-indicator').style.color = '#4CAF50';
                 document.getElementById('stealth-pin').style.color = '#4CAF50';
+            }
+            if (message.toString() === 'PING') {
+                // Reply so the remote knows the tablet is still alive
+                client.publish(topic, 'PONG');
             }
             if (message.toString() === 'START' && (gamePhase === 'waiting' || gamePhase === 'trial')) { showCountdown(); }
             if (message.toString() === 'TRIAL' && (gamePhase === 'waiting' || gamePhase === 'trial')) { startTrialRun(); }
