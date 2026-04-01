@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Balloon Remote Control</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R8RQEKSQL1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-R8RQEKSQL1');
+    </script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         body { margin: 0; height: 100vh; background: #2c3e50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; box-sizing: border-box; text-align: center; }
@@ -37,9 +45,30 @@
 
         #status-text { margin-top: 16px; font-size: 18px; font-weight: bold; }
         #phase-hint { margin-top: 8px; font-size: 14px; color: #95a5a6; max-width: 260px; line-height: 1.4; }
+
+        #conn-status-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 8px 16px; box-sizing: border-box;
+            font-size: 14px; font-weight: bold; text-align: center;
+            z-index: 100; transition: background 0.4s;
+        }
+        #conn-status-bar.paired   { background: #1e8449; color: #fff; }
+        #conn-status-bar.warning  { background: #d35400; color: #fff; }
+        #conn-status-bar.lost     { background: #c0392b; color: #fff; }
+
+        #repaire-btn {
+            display: none; margin-top: 20px;
+            background: #e67e22; color: white; border: none;
+            padding: 14px 30px; font-size: 18px; font-weight: bold;
+            border-radius: 12px; cursor: pointer; width: 100%; max-width: 300px;
+        }
+        #repaire-btn:active { background: #ca6f1e; }
     </style>
 </head>
 <body>
+    <!-- Persistent pairing status bar (always visible once connected) -->
+    <div id="conn-status-bar" class="paired" style="display:none;">🟢 Paired with Tablet</div>
+
     <div id="setup-ui">
         <h2>Enter Tablet PIN 🎈</h2>
         <input type="number" id="pin-input" placeholder="1234" maxlength="4" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
@@ -53,11 +82,56 @@
         <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
         <div id="status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
         <div id="phase-hint">Tap BREATH to demonstrate during the tutorial. Once the child has practiced, tap START RACE when they are ready for the real race.</div>
+        <button id="repaire-btn" onclick="repairWithTablet()">🔄 Re-pair with Tablet</button>
     </div>
 
     <script>
         let client;
         let activeTopic;
+        let heartbeatInterval = null;
+        let heartbeatTimeout = null;
+        let tabletAlive = false;
+
+        const HEARTBEAT_INTERVAL_MS = 15000;  // ping every 15 s
+        const HEARTBEAT_TIMEOUT_MS  = 25000;  // warn if no pong within 25 s
+        const LOST_TIMEOUT_MS       = 50000;  // consider lost after 50 s
+
+        function setStatusBar(state, text) {
+            const bar = document.getElementById('conn-status-bar');
+            const repairBtn = document.getElementById('repaire-btn');
+            bar.style.display = 'block';
+            bar.className = 'paired'; // reset
+            bar.classList.add(state);
+            bar.textContent = text;
+            repairBtn.style.display = state === 'lost' ? 'block' : 'none';
+            // also disable buttons when lost
+            document.getElementById('start-race-btn').disabled = (state === 'lost');
+            document.getElementById('big-breath-btn').disabled  = (state === 'lost');
+        }
+
+        function startHeartbeat() {
+            stopHeartbeat();
+            heartbeatInterval = setInterval(() => {
+                if (client && client.connected) {
+                    client.publish(activeTopic, 'PING');
+                    // Expect a PONG back; escalate if silent
+                    heartbeatTimeout = setTimeout(() => {
+                        setStatusBar('warning', '🟡 Tablet not responding — checking…');
+                    }, HEARTBEAT_TIMEOUT_MS);
+                    setTimeout(() => {
+                        if (!tabletAlive) {
+                            setStatusBar('lost', '🔴 Tablet connection lost — tap Re-pair');
+                        }
+                        tabletAlive = false; // reset for next cycle
+                    }, LOST_TIMEOUT_MS);
+                }
+            }, HEARTBEAT_INTERVAL_MS);
+        }
+
+        function stopHeartbeat() {
+            if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+            if (heartbeatTimeout)  { clearTimeout(heartbeatTimeout);   heartbeatTimeout  = null; }
+        }
 
         function connectToTablet() {
             const pin = document.getElementById('pin-input').value;
@@ -66,20 +140,55 @@
             document.getElementById('status-text').innerText = "Connecting...";
             activeTopic = 'anes-balloon/' + pin;
 
-            // Connect to public EMQX broker
             client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
 
             client.on('connect', () => {
-                // Send hello to wake up the tablet UI
+                client.subscribe(activeTopic);
                 client.publish(activeTopic, 'HELLO');
 
                 document.getElementById('setup-ui').style.display = 'none';
                 document.getElementById('controller-ui').style.display = 'flex';
+                setStatusBar('paired', '🟢 Paired with Tablet');
+                tabletAlive = true;
+                startHeartbeat();
             });
 
-            client.on('error', (err) => {
+            client.on('message', (t, message) => {
+                const msg = message.toString();
+                if (msg === 'PONG') {
+                    tabletAlive = true;
+                    if (heartbeatTimeout) { clearTimeout(heartbeatTimeout); heartbeatTimeout = null; }
+                    setStatusBar('paired', '🟢 Paired with Tablet');
+                    document.getElementById('start-race-btn').disabled = false;
+                    document.getElementById('big-breath-btn').disabled  = false;
+                }
+            });
+
+            client.on('error', () => {
                 document.getElementById('status-text').innerText = "Failed to connect.";
             });
+
+            client.on('offline', () => {
+                setStatusBar('lost', '🔴 Lost connection to server — tap Re-pair');
+            });
+
+            client.on('reconnect', () => {
+                setStatusBar('warning', '🟡 Reconnecting to server…');
+            });
+        }
+
+        function repairWithTablet() {
+            // Re-send HELLO and restart heartbeat without needing to re-enter the PIN
+            if (client && client.connected) {
+                client.publish(activeTopic, 'HELLO');
+                tabletAlive = false;
+                setStatusBar('warning', '🟡 Re-pairing…');
+                startHeartbeat();
+            } else if (client) {
+                // MQTT itself dropped — reconnect
+                setStatusBar('warning', '🟡 Reconnecting…');
+                client.reconnect();
+            }
         }
 
         function sendStart() {
