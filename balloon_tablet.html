@@ -32,6 +32,11 @@
         .sticker-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 24px; padding: 0; }
         .sticker-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
         .sticker-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
+        .shape-row { display: flex; justify-content: center; gap: 12px; margin: 10px 0 20px; flex-wrap: wrap; }
+        .shape-btn { width: 62px; min-height: 62px; border-radius: 12px; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; padding: 4px 2px; line-height: 1; gap: 2px; }
+        .shape-btn span { font-size: 11px; color: #555; font-weight: bold; }
+        .shape-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
+        .shape-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
         .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
         .hidden { display: none !important; }
@@ -124,6 +129,13 @@
                 <div class="color-btn" style="background: #4CAF50;" onclick="selectColor(this, '#C8E6C9', '#4CAF50')"></div>
                 <div class="color-btn" style="background: #9C27B0;" onclick="selectColor(this, '#E1BEE7', '#9C27B0')"></div>
                 <div class="color-btn" style="background: #E91E63;" onclick="selectColor(this, '#F8BBD0', '#E91E63')"></div>
+            </div>
+            <p style="margin:5px 0 0; color:#666; font-size:14px;">Choose a balloon shape:</p>
+            <div class="shape-row">
+                <button type="button" class="shape-btn selected" onclick="selectShape(this,'classic')" aria-label="Classic balloon">🎈<span>Classic</span></button>
+                <button type="button" class="shape-btn" onclick="selectShape(this,'bunny')" aria-label="Bunny balloon">🐰<span>Bunny</span></button>
+                <button type="button" class="shape-btn" onclick="selectShape(this,'bear')" aria-label="Bear balloon">🐻<span>Bear</span></button>
+                <button type="button" class="shape-btn" onclick="selectShape(this,'dino')" aria-label="Dinosaur balloon">🦕<span>Dino</span></button>
             </div>
             <p style="margin:5px 0 0; color:#666; font-size:14px;">Add stickers (up to 5 will show on your balloon!):</p>
             <div class="sticker-row">
@@ -254,9 +266,92 @@
     <div id="controls"><div id="status">Let's get ready!</div></div>
 
     <script>
-        let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
+        let chosenBg = '#FFC107'; let chosenStripe = '#FF5252'; let chosenShape = 'classic';
         const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', '🦄', '🦕'];
         const selectedStickers = new Set();
+
+        const BALLOON_SHAPES = {
+            classic: {
+                getSVG: (bg, stripe, prefix, sk) =>
+                    `<path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="${bg}"/>` +
+                    `<path d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="${stripe}"/>` +
+                    `<text id="${prefix}-sticker-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[0]||''}</text>` +
+                    `<text id="${prefix}-sticker-1" x="68" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[1]||''}</text>` +
+                    `<text id="${prefix}-sticker-2" x="50" y="55" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[2]||''}</text>` +
+                    `<text id="${prefix}-sticker-3" x="32" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[3]||''}</text>` +
+                    `<text id="${prefix}-sticker-4" x="68" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[4]||''}</text>` +
+                    `<rect x="40" y="105" width="20" height="15" fill="#5D4037"/>`
+            },
+            bunny: {
+                getSVG: (bg, stripe, prefix, sk) =>
+                    `<ellipse cx="34" cy="24" rx="9" ry="22" fill="${bg}"/>` +
+                    `<ellipse cx="66" cy="24" rx="9" ry="22" fill="${bg}"/>` +
+                    `<ellipse cx="34" cy="24" rx="5" ry="16" fill="${stripe}"/>` +
+                    `<ellipse cx="66" cy="24" rx="5" ry="16" fill="${stripe}"/>` +
+                    `<ellipse cx="50" cy="66" rx="33" ry="30" fill="${bg}"/>` +
+                    `<ellipse cx="50" cy="73" rx="16" ry="19" fill="${stripe}"/>` +
+                    `<text id="${prefix}-sticker-0" x="32" y="48" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[0]||''}</text>` +
+                    `<text id="${prefix}-sticker-1" x="68" y="48" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[1]||''}</text>` +
+                    `<text id="${prefix}-sticker-2" x="50" y="68" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[2]||''}</text>` +
+                    `<text id="${prefix}-sticker-3" x="32" y="82" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[3]||''}</text>` +
+                    `<text id="${prefix}-sticker-4" x="68" y="82" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[4]||''}</text>` +
+                    `<circle cx="41" cy="57" r="3.5" fill="#222"/>` +
+                    `<circle cx="59" cy="57" r="3.5" fill="#222"/>` +
+                    `<ellipse cx="50" cy="65" rx="4" ry="3" fill="#ffb6c1"/>` +
+                    `<rect x="47" y="96" width="6" height="9" fill="#8D6E63"/>` +
+                    `<rect x="40" y="105" width="20" height="12" fill="#8D6E63"/>`
+            },
+            bear: {
+                getSVG: (bg, stripe, prefix, sk) =>
+                    `<circle cx="26" cy="25" r="13" fill="${bg}"/>` +
+                    `<circle cx="74" cy="25" r="13" fill="${bg}"/>` +
+                    `<circle cx="26" cy="25" r="8" fill="${stripe}"/>` +
+                    `<circle cx="74" cy="25" r="8" fill="${stripe}"/>` +
+                    `<ellipse cx="50" cy="64" rx="35" ry="33" fill="${bg}"/>` +
+                    `<ellipse cx="50" cy="72" rx="17" ry="21" fill="${stripe}"/>` +
+                    `<text id="${prefix}-sticker-0" x="35" y="43" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[0]||''}</text>` +
+                    `<text id="${prefix}-sticker-1" x="65" y="43" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[1]||''}</text>` +
+                    `<text id="${prefix}-sticker-2" x="35" y="82" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[2]||''}</text>` +
+                    `<text id="${prefix}-sticker-3" x="65" y="82" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[3]||''}</text>` +
+                    `<text id="${prefix}-sticker-4" x="50" y="82" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[4]||''}</text>` +
+                    `<circle cx="40" cy="54" r="4" fill="#222"/>` +
+                    `<circle cx="60" cy="54" r="4" fill="#222"/>` +
+                    `<ellipse cx="50" cy="66" rx="6" ry="4" fill="#222"/>` +
+                    `<rect x="47" y="97" width="6" height="8" fill="#8D6E63"/>` +
+                    `<rect x="40" y="105" width="20" height="12" fill="#8D6E63"/>`
+            },
+            dino: {
+                getSVG: (bg, stripe, prefix, sk) =>
+                    `<ellipse cx="14" cy="78" rx="8" ry="14" transform="rotate(-20,14,78)" fill="${bg}"/>` +
+                    `<ellipse cx="68" cy="32" rx="7" ry="20" transform="rotate(10,68,32)" fill="${bg}"/>` +
+                    `<ellipse cx="47" cy="70" rx="37" ry="26" fill="${bg}"/>` +
+                    `<polygon points="32,46 36,33 40,46" fill="${stripe}"/>` +
+                    `<polygon points="42,44 46,30 50,44" fill="${stripe}"/>` +
+                    `<polygon points="52,43 57,29 62,43" fill="${stripe}"/>` +
+                    `<ellipse cx="43" cy="74" rx="23" ry="15" fill="${stripe}"/>` +
+                    `<text id="${prefix}-sticker-0" x="22" y="66" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[0]||''}</text>` +
+                    `<text id="${prefix}-sticker-1" x="40" y="64" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[1]||''}</text>` +
+                    `<text id="${prefix}-sticker-2" x="22" y="78" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[2]||''}</text>` +
+                    `<text id="${prefix}-sticker-3" x="40" y="77" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[3]||''}</text>` +
+                    `<text id="${prefix}-sticker-4" x="31" y="59" text-anchor="middle" dominant-baseline="middle" font-size="18">${sk[4]||''}</text>` +
+                    `<ellipse cx="72" cy="12" rx="11" ry="8" fill="${bg}"/>` +
+                    `<circle cx="77" cy="10" r="2.5" fill="#222"/>` +
+                    `<circle cx="80" cy="15" r="1.5" fill="#222"/>` +
+                    `<path d="M68,17 Q73,22 80,18" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>` +
+                    `<rect x="44" y="96" width="6" height="9" fill="#8D6E63"/>` +
+                    `<rect x="38" y="105" width="24" height="12" fill="#8D6E63"/>`
+            }
+        };
+
+        function currentStickers() {
+            const sorted = [...selectedStickers].sort((a, b) => a - b);
+            return Array.from({length: 5}, (_, i) => i < sorted.length ? STICKERS[sorted[i]] : '');
+        }
+
+        function renderBalloonPreview() {
+            const svg = document.getElementById('preview-balloon');
+            svg.innerHTML = BALLOON_SHAPES[chosenShape].getSVG(chosenBg, chosenStripe, 'prev', currentStickers());
+        }
         let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'trial' | 'countdown' | 'racing'
         let currentTutorialStep = 0;
         const TUTORIAL_TOTAL = 4;
@@ -264,7 +359,14 @@
         function selectColor(btn, bg, stripe) {
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected'); chosenBg = bg; chosenStripe = stripe;
-            document.getElementById('prev-bg').setAttribute('fill', bg); document.getElementById('prev-stripe').setAttribute('fill', stripe);
+            renderBalloonPreview();
+        }
+
+        function selectShape(btn, shape) {
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            chosenShape = shape;
+            renderBalloonPreview();
         }
 
         function selectSticker(btn, index) {
@@ -279,23 +381,22 @@
         }
 
         function updateStickerPreview() {
-            const selected = [...selectedStickers].sort((a, b) => a - b);
-            for (let slot = 0; slot < 5; slot++) {
-                document.getElementById(`prev-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
-            }
+            renderBalloonPreview();
         }
 
         function finishCustomization() {
             const kidName = document.getElementById('custom-name').value.trim() || 'You!';
             document.getElementById('kid-label').innerText = kidName;
-            document.getElementById('game-bg').setAttribute('fill', chosenBg); document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
-            const selected = [...selectedStickers].sort((a, b) => a - b);
-            for (let slot = 0; slot < 5; slot++) {
-                document.getElementById(`game-sticker-${slot}`).textContent = slot < selected.length ? STICKERS[selected[slot]] : '';
+            const sk = currentStickers();
+            const gameSVG = document.querySelector('#balloon-kid svg');
+            if (gameSVG) {
+                gameSVG.innerHTML = BALLOON_SHAPES[chosenShape].getSVG(chosenBg, chosenStripe, 'game', sk);
             }
-            // Apply chosen colours to the tutorial demo balloon
-            document.getElementById('tutorial-demo-bg').setAttribute('fill', chosenBg);
-            document.getElementById('tutorial-demo-stripe').setAttribute('fill', chosenStripe);
+            // Apply chosen shape and colours to the tutorial demo balloon
+            const tutorialSVG = document.querySelector('#tutorial-demo-balloon svg');
+            if (tutorialSVG) {
+                tutorialSVG.innerHTML = BALLOON_SHAPES[chosenShape].getSVG(chosenBg, chosenStripe, 'tutorial-demo', ['','','','','']);
+            }
             document.getElementById('customization-ui').classList.add('hidden');
 
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
