@@ -136,6 +136,10 @@
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 6)" aria-label="Heart sticker">❤️</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 7)" aria-label="Butterfly sticker">🦋</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 8)" aria-label="Flower sticker">🌸</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 9)" aria-label="Smiling poop sticker">💩</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 10)" aria-label="Teddy bear sticker">🧸</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 11)" aria-label="Unicorn sticker">🦄</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 12)" aria-label="Dinosaur sticker">🦕</button>
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
         </div>
@@ -251,7 +255,7 @@
 
     <script>
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
-        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸'];
+        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', '🦄', '🦕'];
         const selectedStickers = new Set();
         let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'trial' | 'countdown' | 'racing'
         let currentTutorialStep = 0;
