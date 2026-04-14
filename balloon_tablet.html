@@ -146,7 +146,7 @@
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 8)" aria-label="Flower sticker">🌸</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 9)" aria-label="Smiling poop sticker">💩</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 10)" aria-label="Teddy bear sticker">🧸</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, 11)" aria-label="Unicorn sticker">🦄</button>
+                <button type="button" class="sticker-btn" onclick="selectSticker(this, 11)" aria-label="Bunny sticker"><img src="https://github.com/user-attachments/assets/c8170a69-0e2d-40a9-84a5-ee5bb01c0738" alt="bunny"></button>
                 <button type="button" class="sticker-upload-btn" onclick="document.getElementById('sticker-file-input').click()" aria-label="Upload your own sticker" title="Upload your own sticker">+</button>
                 <input type="file" id="sticker-file-input" accept="image/*" style="display:none" onchange="uploadSticker(this)">
             </div>
@@ -269,7 +269,7 @@
 
     <script>
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
-        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', '🐰'];
+        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', 'https://github.com/user-attachments/assets/c8170a69-0e2d-40a9-84a5-ee5bb01c0738'];
         const selectedStickers = new Set();
 
         // Apply a sticker value (emoji or data URL) to a pair of SVG text+image elements
@@ -280,7 +280,7 @@
                 textEl.textContent = '';
                 imgEl.setAttribute('href', '');
                 imgEl.style.display = 'none';
-            } else if (value.startsWith('data:')) {
+            } else if (value.startsWith('data:') || value.startsWith('http')) {
                 textEl.textContent = '';
                 imgEl.setAttribute('href', value);
                 imgEl.style.display = '';
