@@ -32,9 +32,7 @@
         .sticker-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 24px; padding: 0; }
         .sticker-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
         .sticker-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
-        .sticker-btn img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; pointer-events: none; }
-        .sticker-upload-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px dashed #aaa; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; padding: 0; color: #aaa; }
-        .sticker-upload-btn:hover { border-color: #4CAF50; color: #4CAF50; transform: scale(1.1); }
+        .sticker-btn img { width: 32px; height: 32px; object-fit: contain; pointer-events: none; }
         .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
         .hidden { display: none !important; }
@@ -146,9 +144,7 @@
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 8)" aria-label="Flower sticker">🌸</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 9)" aria-label="Smiling poop sticker">💩</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 10)" aria-label="Teddy bear sticker">🧸</button>
-                <button type="button" class="sticker-btn" onclick="selectSticker(this, 11)" aria-label="Bunny sticker"><img src="https://github.com/user-attachments/assets/c8170a69-0e2d-40a9-84a5-ee5bb01c0738" alt="bunny"></button>
-                <button type="button" class="sticker-upload-btn" onclick="document.getElementById('sticker-file-input').click()" aria-label="Upload your own sticker" title="Upload your own sticker">+</button>
-                <input type="file" id="sticker-file-input" accept="image/*" style="display:none" onchange="uploadSticker(this)">
+                <button type="button" class="sticker-btn" style="background: transparent;" onclick="selectSticker(this, 11)" aria-label="Bunny sticker"><img src="https://github.com/user-attachments/assets/c8170a69-0e2d-40a9-84a5-ee5bb01c0738" alt="bunny"></button>
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
         </div>
@@ -291,56 +287,6 @@
             }
         }
 
-        function uploadSticker(input) {
-            const file = input.files[0];
-            if (!file) return;
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file.');
-                input.value = '';
-                return;
-            }
-            // Limit to 5MB
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Image is too large. Please choose an image under 5 MB.');
-                input.value = '';
-                return;
-            }
-            // Limit custom stickers to 10
-            const maxCustom = 10;
-            const customCount = STICKERS.length - 12;
-            if (customCount >= maxCustom) {
-                alert('You can only add up to ' + maxCustom + ' custom stickers.');
-                input.value = '';
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const dataUrl = e.target.result;
-                const index = STICKERS.length;
-                STICKERS.push(dataUrl);
-                // Create a new sticker button showing the uploaded image
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'sticker-btn';
-                btn.setAttribute('aria-label', 'Custom sticker');
-                btn.setAttribute('data-sticker-index', index);
-                const img = document.createElement('img');
-                img.src = dataUrl;
-                img.alt = 'custom';
-                btn.appendChild(img);
-                btn.addEventListener('click', function() { selectSticker(btn, index); });
-                // Insert before the upload button
-                const uploadBtn = document.querySelector('.sticker-upload-btn');
-                uploadBtn.parentNode.insertBefore(btn, uploadBtn);
-            };
-            reader.onerror = function() {
-                alert('Could not read the image file. Please try a different file.');
-            };
-            reader.readAsDataURL(file);
-            // Reset so the same file can be re-uploaded if needed
-            input.value = '';
-        }
         let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'trial' | 'countdown' | 'racing'
         let currentTutorialStep = 0;
         const TUTORIAL_TOTAL = 4;
