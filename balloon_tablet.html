@@ -33,9 +33,6 @@
         .sticker-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
         .sticker-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
         .sticker-btn img { width: 32px; height: 32px; object-fit: contain; pointer-events: none; }
-        .sticker-btn-bunny { background: transparent; border-radius: 4px; box-shadow: none; }
-        .sticker-btn-bunny.selected { background: transparent; }
-        .sticker-btn-bunny img { width: 44px; height: 44px; }
         .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
         .hidden { display: none !important; }
@@ -147,7 +144,7 @@
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 8)" aria-label="Flower sticker">🌸</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 9)" aria-label="Smiling poop sticker">💩</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 10)" aria-label="Teddy bear sticker">🧸</button>
-                <button type="button" class="sticker-btn sticker-btn-bunny" onclick="selectSticker(this, 11)" aria-label="Bunny sticker"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj4KICA8ZWxsaXBzZSBjeD0iMzAiIGN5PSIzMCIgcng9IjEyIiByeT0iMjgiIGZpbGw9IndoaXRlIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxlbGxpcHNlIGN4PSI3MCIgY3k9IjMwIiByeD0iMTIiIHJ5PSIyOCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iIzU1NSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGVsbGlwc2UgY3g9IjMwIiBjeT0iMzIiIHJ4PSI2IiByeT0iMjAiIGZpbGw9IiNmZmI2YzEiLz4KICA8ZWxsaXBzZSBjeD0iNzAiIGN5PSIzMiIgcng9IjYiIHJ5PSIyMCIgZmlsbD0iI2ZmYjZjMSIvPgogIDxjaXJjbGUgY3g9IjUwIiBjeT0iNzUiIHI9IjQwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjMiLz4KICA8Y2lyY2xlIGN4PSIzNyIgY3k9IjcwIiByPSI1IiBmaWxsPSIjMzMzIi8+CiAgPGNpcmNsZSBjeD0iNjMiIGN5PSI3MCIgcj0iNSIgZmlsbD0iIzMzMyIvPgogIDxjaXJjbGUgY3g9IjM5IiBjeT0iNjgiIHI9IjIiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iNjUiIGN5PSI2OCIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICA8ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQiIHJ5PSIzIiBmaWxsPSIjZmZiNmMxIi8+CiAgPHBhdGggZD0iTSA0NCA4NSBRIDUwIDkyIDU2IDg1IiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxsaW5lIHgxPSIxNSIgeTE9Ijc4IiB4Mj0iNDQiIHkyPSI4MCIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSIxNSIgeTE9Ijg0IiB4Mj0iNDQiIHkyPSI4MiIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSI4NSIgeTE9Ijc4IiB4Mj0iNTYiIHkyPSI4MCIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSI4NSIgeTE9Ijg0IiB4Mj0iNTYiIHkyPSI4MiIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8L3N2Zz4K" alt="bunny"></button>
+                <button type="button" class="sticker-btn" style="background: transparent;" onclick="selectSticker(this, 11)" aria-label="Bunny sticker"><img src="https://github.com/user-attachments/assets/2460866d-e806-4c94-a42f-e1378918ff5d" alt="bunny"></button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 12)" aria-label="Unicorn sticker">🦄</button>
             </div>
             <button class="btn-primary" onclick="finishCustomization()">Ready to Race!</button>
@@ -269,7 +266,7 @@
 
     <script>
         let chosenBg = '#FFC107'; let chosenStripe = '#FF5252';
-        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj4KICA8ZWxsaXBzZSBjeD0iMzAiIGN5PSIzMCIgcng9IjEyIiByeT0iMjgiIGZpbGw9IndoaXRlIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxlbGxpcHNlIGN4PSI3MCIgY3k9IjMwIiByeD0iMTIiIHJ5PSIyOCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iIzU1NSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGVsbGlwc2UgY3g9IjMwIiBjeT0iMzIiIHJ4PSI2IiByeT0iMjAiIGZpbGw9IiNmZmI2YzEiLz4KICA8ZWxsaXBzZSBjeD0iNzAiIGN5PSIzMiIgcng9IjYiIHJ5PSIyMCIgZmlsbD0iI2ZmYjZjMSIvPgogIDxjaXJjbGUgY3g9IjUwIiBjeT0iNzUiIHI9IjQwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjMiLz4KICA8Y2lyY2xlIGN4PSIzNyIgY3k9IjcwIiByPSI1IiBmaWxsPSIjMzMzIi8+CiAgPGNpcmNsZSBjeD0iNjMiIGN5PSI3MCIgcj0iNSIgZmlsbD0iIzMzMyIvPgogIDxjaXJjbGUgY3g9IjM5IiBjeT0iNjgiIHI9IjIiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iNjUiIGN5PSI2OCIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICA8ZWxsaXBzZSBjeD0iNTAiIGN5PSI4MCIgcng9IjQiIHJ5PSIzIiBmaWxsPSIjZmZiNmMxIi8+CiAgPHBhdGggZD0iTSA0NCA4NSBRIDUwIDkyIDU2IDg1IiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxsaW5lIHgxPSIxNSIgeTE9Ijc4IiB4Mj0iNDQiIHkyPSI4MCIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSIxNSIgeTE9Ijg0IiB4Mj0iNDQiIHkyPSI4MiIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSI4NSIgeTE9Ijc4IiB4Mj0iNTYiIHkyPSI4MCIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSI4NSIgeTE9Ijg0IiB4Mj0iNTYiIHkyPSI4MiIgc3Ryb2tlPSIjYWFhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8L3N2Zz4K', '🦄'];
+        const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', 'https://github.com/user-attachments/assets/2460866d-e806-4c94-a42f-e1378918ff5d', '🦄'];
         const selectedStickers = new Set();
 
         // Apply a sticker value (emoji or data URL) to a pair of SVG text+image elements
