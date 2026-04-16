@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hot Air Balloon - TABLET (20 Breaths)</title>
+    <title>Hot Air Balloon - TABLET (30 Breaths)</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R8RQEKSQL1"></script>
     <script>
@@ -98,7 +98,7 @@
     </style>
 </head>
 <body>
-    <div id="breath-counter">Breaths: 0/20</div>
+    <div id="breath-counter">Breaths: 0/30</div>
 
     <div id="customization-ui" class="modal-overlay">
         <div class="modal-content">
@@ -446,7 +446,7 @@
         });
 
         let breaths = 0; 
-        const maxBreaths = 20; 
+        const maxBreaths = 30; 
         const finishHeight = 70; 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -540,20 +540,20 @@
             const kidProgress = (breaths / maxBreaths) * finishHeight;
             let targetDocHeight = 0;
 
-            if (breaths <= 6) { targetDocHeight = (breaths / maxBreaths) * finishHeight * 0.8; }
-            else if (breaths <= 10) { targetDocHeight = kidProgress; }
-            else if (breaths <= 16) { const bobble = (breaths % 2 === 0) ? 2 : -1; targetDocHeight = kidProgress + bobble; }
-            else { targetDocHeight = (16 / maxBreaths) * finishHeight; }
+            if (breaths <= 9) { targetDocHeight = (breaths / maxBreaths) * finishHeight * 0.8; }
+            else if (breaths <= 15) { targetDocHeight = kidProgress; }
+            else if (breaths <= 24) { const bobble = (breaths % 2 === 0) ? 2 : -1; targetDocHeight = kidProgress + bobble; }
+            else { targetDocHeight = (24 / maxBreaths) * finishHeight; }
 
             kidBalloon.style.bottom = kidProgress + '%';
             docBalloon.style.bottom = targetDocHeight + '%';
 
-            if (breaths >= 9 && breaths <= 16) {
+            if (breaths >= 14 && breaths <= 24) {
                 setTimeout(() => {
                     burnerDoc.classList.add('active'); playBurnerSound(true);
                     setTimeout(() => burnerDoc.classList.remove('active'), 1000);
                 }, 300);
-            } else if (breaths < 17 && breaths % 2 === 0) {
+            } else if (breaths < 25 && breaths % 2 === 0) {
                 setTimeout(() => {
                     burnerDoc.classList.add('active'); 
                     setTimeout(() => burnerDoc.classList.remove('active'), 600);
@@ -564,14 +564,14 @@
                 controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
                 if (breaths === maxBreaths) {
                     status.innerText = `🎉 Great practice, ${kidName}! Ask the doctor to start the real race!`;
-                } else if (breaths >= 10 && breaths <= 16) {
+                } else if (breaths >= 15 && breaths <= 24) {
                     if (breaths % 2 === 0) { status.innerText = `👍 You're doing great — keep those big breaths going!`; }
                     else { status.innerText = `💪 Excellent! Big breaths win the race!`; }
-                } else if (breaths === 17) {
+                } else if (breaths === 25) {
                     status.innerText = `🌟 Almost there! Just a few more breaths!`;
                 } else {
-                    if (breaths < 6) status.innerText = `🎈 Good start! Keep going!`;
-                    else if (breaths > 17) status.innerText = `🔥 Almost done — ${maxBreaths - breaths} more!`;
+                    if (breaths < 9) status.innerText = `🎈 Good start! Keep going!`;
+                    else if (breaths > 25) status.innerText = `🔥 Almost done — ${maxBreaths - breaths} more!`;
                     else status.innerText = `🎈 Nice breath! Keep practicing!`;
                 }
             } else {
@@ -580,19 +580,19 @@
                     status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`; 
                     setTimeout(triggerConfetti, 300); 
                 } 
-                else if (breaths >= 10 && breaths <= 16) {
+                else if (breaths >= 15 && breaths <= 24) {
                     controls.classList.add('panic-mode'); status.classList.add('panic-text');
                     if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; } 
                     else { status.innerText = `⚠️ He's right next to you! Don't stop!`; }
                 }
-                else if (breaths === 17) {
+                else if (breaths === 25) {
                     controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
                     status.innerText = `Yes! You're pulling ahead! Final sprint!`;
                 }
                 else { 
                     controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                    if (breaths < 6) status.innerText = `Great start! You're in the lead!`;
-                    else if (breaths > 17) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
+                    if (breaths < 9) status.innerText = `Great start! You're in the lead!`;
+                    else if (breaths > 25) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
                     else status.innerText = `Keep taking big deep breaths!`;
                 }
             }
