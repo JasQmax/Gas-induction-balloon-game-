@@ -80,7 +80,6 @@
         <button id="start-race-btn" onclick="sendStart()">🚀<br>START<br>RACE</button>
         <hr class="divider">
         <button id="big-breath-btn" onclick="sendBreath()">BREATH!</button>
-        <div id="controller-status-text" style="color: #2ecc71;">🟢 Connected to Tablet!</div>
         <div id="phase-hint">Tap BREATH to demonstrate during the tutorial. Once the child has practiced, tap START RACE when they are ready for the real race.</div>
         <button id="repaire-btn" onclick="repairWithTablet()">🔄 Re-pair with Tablet</button>
     </div>
@@ -107,20 +106,6 @@
             // also disable buttons when lost
             document.getElementById('start-race-btn').disabled = (state === 'lost');
             document.getElementById('big-breath-btn').disabled  = (state === 'lost');
-            // update the status line under the BREATH! button to match connection state
-            const ctrlStatus = document.getElementById('controller-status-text');
-            if (ctrlStatus) {
-                if (state === 'paired') {
-                    ctrlStatus.style.color = '#2ecc71';
-                    ctrlStatus.textContent = '🟢 Connected to Tablet!';
-                } else if (state === 'warning') {
-                    ctrlStatus.style.color = '#f39c12';
-                    ctrlStatus.textContent = '🟡 Connection unstable…';
-                } else if (state === 'lost') {
-                    ctrlStatus.style.color = '#e74c3c';
-                    ctrlStatus.textContent = '🔴 Disconnected from Tablet';
-                }
-            }
         }
 
         function startHeartbeat() {
@@ -216,11 +201,9 @@
         function updateButtonStates(phase) {
             const startBtn = document.getElementById('start-race-btn');
             const hint = document.getElementById('phase-hint');
-            const statusEl = document.getElementById('controller-status-text');
             if (phase === 'racing') {
                 startBtn.disabled = true;
                 hint.textContent = 'Race in progress! Press BREATH for each big breath the child takes.';
-                statusEl.innerText = '🏁 Race started!';
             }
         }
 
