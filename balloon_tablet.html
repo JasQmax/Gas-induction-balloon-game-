@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hot Air Balloon - TABLET (30 Breaths)</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R8RQEKSQL1"></script>
@@ -15,25 +15,29 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 90; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); text-align: center; max-width: 500px; width: 90%; position: relative; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 90; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); overflow-y: auto; }
+        .modal-content { background: white; padding: clamp(15px, 4vw, 30px); border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); text-align: center; max-width: 500px; width: 94%; position: relative; margin: auto; }
 
-        #stealth-pin-container { position: absolute; top: 25px; right: 25px; font-family: monospace; color: #ccc; font-size: 14px; text-align: right; }
-        #stealth-pin { font-size: 24px; font-weight: bold; color: #999; letter-spacing: 2px; }
-        #conn-indicator { font-size: 10px; color: orange; margin-top: 2px; }
+        #stealth-pin-container { position: absolute; top: 15px; right: 15px; font-family: monospace; color: #ccc; font-size: clamp(10px, 2.5vw, 14px); text-align: right; }
+        #stealth-pin { font-size: clamp(16px, 5vw, 24px); font-weight: bold; color: #999; letter-spacing: 2px; }
+        #conn-indicator { font-size: clamp(9px, 2vw, 10px); color: orange; margin-top: 2px; }
 
-        #custom-name { font-size: 24px; padding: 10px; width: 80%; border: 2px solid #ccc; border-radius: 10px; margin: 15px 0; text-align: center; font-weight: bold; }
-        .color-row { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
-        .color-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #custom-name { font-size: clamp(16px, 4vw, 24px); padding: 8px; width: 82%; border: 2px solid #ccc; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold; }
+        .color-row { display: flex; justify-content: center; gap: clamp(8px, 2.5vw, 15px); margin: 12px 0; flex-wrap: wrap; }
+        .color-btn { width: clamp(36px, 9vw, 50px); height: clamp(36px, 9vw, 50px); border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .color-btn.selected { border-color: #333; transform: scale(1.1); }
-        .sticker-row { display: flex; justify-content: center; gap: 12px; margin: 10px 0 20px; flex-wrap: wrap; }
-        .sticker-btn { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 24px; padding: 0; }
+        .sticker-row { display: flex; justify-content: center; gap: clamp(6px, 2vw, 12px); margin: 8px 0 14px; flex-wrap: wrap; }
+        .sticker-btn { width: clamp(36px, 9vw, 50px); height: clamp(36px, 9vw, 50px); border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: clamp(16px, 4.5vw, 24px); padding: 0; }
         .sticker-btn.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.1); }
         .sticker-btn:focus-visible { outline: 3px solid #4CAF50; outline-offset: 2px; }
         .sticker-btn img { width: 32px; height: 32px; object-fit: contain; pointer-events: none; }
-        .btn-primary { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 22px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        .btn-primary { background: #4CAF50; color: white; border: none; padding: clamp(10px, 3vw, 15px) clamp(24px, 7vw, 40px); font-size: clamp(16px, 4.5vw, 22px); border-radius: 30px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+
+        .modal-content h1 { font-size: clamp(18px, 5vw, 26px); margin-top: 0; color: #333; }
+        .modal-content p { font-size: clamp(12px, 3vw, 14px); }
 
         .hidden { display: none !important; }
 
@@ -42,7 +46,7 @@
         .cloud { position: absolute; color: white; opacity: 0.8; user-select: none; z-index: 1; }
 
         .bird-container { position: absolute; z-index: 5; animation: flyRight linear infinite; }
-        .bird-svg { width: 50px; height: 50px; animation: flap 0.6s ease-in-out infinite alternate; }
+        .bird-svg { width: clamp(28px, 6vw, 50px); height: clamp(28px, 6vw, 50px); animation: flap 0.6s ease-in-out infinite alternate; }
 
         @keyframes flap { 0% { transform: scaleY(1); } 100% { transform: scaleY(-0.4); } }
         @keyframes flyRight {
@@ -56,45 +60,59 @@
         .bird-3 { top: 8%; animation-duration: 25s; animation-delay: 9s; transform: scale(0.5); }
         .bird-4 { top: 30%; animation-duration: 15s; animation-delay: 12s; transform: scale(0.8); }
 
-        .finish-line { position: absolute; top: 15%; width: 100%; height: 20px; background: repeating-linear-gradient(90deg, #fff, #fff 20px, #FF5252 20px, #FF5252 40px); opacity: 0.9; z-index: 2; }
-        .finish-text { position: absolute; top: calc(15% - 25px); width: 100%; text-align: center; font-weight: bold; color: #333; font-size: 20px; letter-spacing: 2px; z-index: 2; }
+        .finish-line { position: absolute; top: 15%; width: 100%; height: 16px; background: repeating-linear-gradient(90deg, #fff, #fff 20px, #FF5252 20px, #FF5252 40px); opacity: 0.9; z-index: 2; }
+        .finish-text { position: absolute; top: calc(15% - 22px); width: 100%; text-align: center; font-weight: bold; color: #333; font-size: clamp(12px, 3.5vw, 20px); letter-spacing: 2px; z-index: 2; }
 
         .track { width: 40%; height: 100%; position: relative; display: flex; justify-content: center; z-index: 10; }
         .balloon-container { position: absolute; bottom: 0; transition: bottom 1s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; align-items: center; }
         .floating { animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
-        .burner { width: 16px; height: 25px; background: orange; border-radius: 50% 50% 20% 20%; position: absolute; bottom: 30px; opacity: 0; filter: blur(1px); }
+        .burner { width: 12px; height: 20px; background: orange; border-radius: 50% 50% 20% 20%; position: absolute; bottom: 28px; opacity: 0; filter: blur(1px); }
         .burner.active { opacity: 1; animation: flame_flickering 0.1s infinite alternate; }
         @keyframes flame_flickering { 0% { transform: scaleY(1) rotate(-2deg); background: yellow; box-shadow: 0 0 10px yellow; } 100% { transform: scaleY(1.4) rotate(2deg); background: #FF5722; box-shadow: 0 0 20px red; } }
 
-        .label { margin-top: 8px; font-weight: bold; color: #333; background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 15px; font-size: 20px; }
+        .label { margin-top: 6px; font-weight: bold; color: #333; background: rgba(255,255,255,0.9); padding: clamp(3px, 1vw, 5px) clamp(8px, 2.5vw, 15px); border-radius: 15px; font-size: clamp(12px, 3.5vw, 20px); white-space: nowrap; }
 
-        #controls { height: 80px; background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.15); z-index: 20; transition: background-color 0.5s; }
-        #status { font-size: 22px; font-weight: bold; color: #333; transition: color 0.5s; }
+        /* Balloon SVG sizing — smaller on phones */
+        .balloon-svg-large { display: block; }
+        .balloon-svg-small { display: none; }
+
+        #controls { height: clamp(56px, 10vh, 80px); background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.15); z-index: 20; transition: background-color 0.5s; padding: 0 10px; }
+        #status { font-size: clamp(13px, 3.5vw, 22px); font-weight: bold; color: #333; transition: color 0.5s; text-align: center; line-height: 1.3; }
 
         .panic-mode { background-color: #ffebee !important; }
-        .panic-text { color: #d32f2f !important; font-size: 26px !important; }
+        .panic-text { color: #d32f2f !important; font-size: clamp(15px, 4vw, 26px) !important; }
 
-        #breath-counter { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 18px; z-index: 50; }
+        #breath-counter { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.8); padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: clamp(12px, 3.5vw, 18px); z-index: 50; }
 
         /* Tutorial */
-        .tutorial-content { max-width: 480px; padding: 30px 30px 20px; }
-        .tutorial-step { text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .tutorial-icon { font-size: 80px; margin: 5px 0; line-height: 1.1; }
-        .tutorial-step h2 { font-size: 28px; color: #333; margin: 10px 0 8px; }
-        .tutorial-step p { font-size: 20px; color: #555; line-height: 1.5; margin: 0; }
-        .tutorial-dots { margin: 18px 0 10px; display: flex; justify-content: center; gap: 12px; }
-        .dot { width: 13px; height: 13px; border-radius: 50%; background: #ddd; display: inline-block; transition: background 0.3s, transform 0.3s; }
+        .tutorial-content { max-width: 480px; padding: clamp(15px, 4vw, 30px) clamp(15px, 4vw, 30px) clamp(12px, 3vw, 20px); }
+        .tutorial-step { text-align: center; min-height: clamp(160px, 35vw, 220px); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .tutorial-icon { font-size: clamp(52px, 14vw, 80px); margin: 5px 0; line-height: 1.1; }
+        .tutorial-step h2 { font-size: clamp(18px, 5vw, 28px); color: #333; margin: 8px 0 6px; }
+        .tutorial-step p { font-size: clamp(14px, 3.8vw, 20px); color: #555; line-height: 1.5; margin: 0; }
+        .tutorial-dots { margin: 12px 0 8px; display: flex; justify-content: center; gap: 10px; }
+        .dot { width: 11px; height: 11px; border-radius: 50%; background: #ddd; display: inline-block; transition: background 0.3s, transform 0.3s; }
         .dot.active { background: #4CAF50; transform: scale(1.25); }
-        .tutorial-live-track { width: 90px; height: 140px; background: linear-gradient(to top, #81C784 0%, #87CEEB 100%); border-radius: 10px; position: relative; overflow: hidden; margin: 5px auto; border-bottom: 4px solid #4CAF50; }
+        .tutorial-live-track { width: clamp(60px, 18vw, 90px); height: clamp(100px, 25vw, 140px); background: linear-gradient(to top, #81C784 0%, #87CEEB 100%); border-radius: 10px; position: relative; overflow: hidden; margin: 5px auto; border-bottom: 4px solid #4CAF50; }
         .tutorial-live-balloon { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); transition: bottom 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); }
 
         /* Countdown overlay */
         #countdown-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: background-color 0.6s; }
-        #countdown-text { font-size: 86px; font-weight: bold; color: white; text-shadow: 0 4px 24px rgba(0,0,0,0.25); text-align: center; }
+        #countdown-text { font-size: clamp(48px, 14vw, 86px); font-weight: bold; color: white; text-shadow: 0 4px 24px rgba(0,0,0,0.25); text-align: center; padding: 0 20px; }
         @keyframes countPulse { 0% { transform: scale(0.4); opacity: 0; } 65% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
         .count-animate { animation: countPulse 0.55s ease-out forwards; }
+
+        /* ── Phone-specific overrides (≤ 480px wide) ── */
+        @media (max-width: 480px) {
+            .balloon-svg-large { display: none; }
+            .balloon-svg-small { display: block; }
+            .cloud { font-size: calc(var(--cloud-size, 60px) * 0.55) !important; }
+            .bird-svg { width: 22px; height: 22px; }
+            #sky { padding-bottom: 12px; border-bottom-width: 5px; }
+            .finish-line { height: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -106,8 +124,8 @@
                 <div id="stealth-pin">1234</div>
                 <div id="conn-indicator">Connecting...</div>
             </div>
-            <h1 style="margin-top:0; color:#333;">Design Your Balloon!</h1>
-            <svg id="preview-balloon" width="120" height="150" viewBox="0 0 100 120">
+            <h1>Design Your Balloon!</h1>
+            <svg id="preview-balloon" width="clamp(80px,20vw,120px)" height="clamp(100px,25vw,150px)" viewBox="0 0 100 120" style="width:clamp(80px,20vw,120px);height:auto;">
                 <path id="prev-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
                 <path id="prev-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
                 <text id="prev-sticker-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
@@ -123,7 +141,7 @@
                 <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
             </svg>
             <input type="text" id="custom-name" placeholder="What is your name?" autocomplete="off" maxlength="12">
-            <p style="margin:5px 0 0; color:#666; font-size:14px;">Choose a colour:</p>
+            <p style="margin:5px 0 0; color:#666;">Choose a colour:</p>
             <div class="color-row">
                 <div class="color-btn selected" style="background: #FF5252;" onclick="selectColor(this, '#FFC107', '#FF5252')"></div>
                 <div class="color-btn" style="background: #2196F3;" onclick="selectColor(this, '#BBDEFB', '#2196F3')"></div>
@@ -131,7 +149,7 @@
                 <div class="color-btn" style="background: #9C27B0;" onclick="selectColor(this, '#E1BEE7', '#9C27B0')"></div>
                 <div class="color-btn" style="background: #E91E63;" onclick="selectColor(this, '#F8BBD0', '#E91E63')"></div>
             </div>
-            <p style="margin:5px 0 0; color:#666; font-size:14px;">Add stickers (up to 5 will show on your balloon!):</p>
+            <p style="margin:5px 0 0; color:#666;">Add stickers (up to 5):</p>
             <div class="sticker-row">
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 0)" aria-label="Car sticker">🚗</button>
                 <button type="button" class="sticker-btn" onclick="selectSticker(this, 1)" aria-label="Ambulance sticker">🚑</button>
@@ -155,7 +173,7 @@
         <div class="modal-content tutorial-content">
             <div id="tutorial-step-0" class="tutorial-step">
                 <div class="tutorial-icon">
-                    <svg width="72" height="90" viewBox="0 0 100 120">
+                    <svg width="72" height="90" viewBox="0 0 100 120" style="width:clamp(48px,14vw,72px);height:auto;">
                         <path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
                         <path d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
                         <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
@@ -167,7 +185,7 @@
             <div id="tutorial-step-1" class="tutorial-step hidden">
                 <div class="tutorial-live-track">
                     <div id="tutorial-demo-balloon" class="tutorial-live-balloon">
-                        <svg width="60" height="75" viewBox="0 0 100 120">
+                        <svg viewBox="0 0 100 120" style="width:clamp(40px,12vw,60px);height:auto;">
                             <path id="tutorial-demo-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
                             <path id="tutorial-demo-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
                             <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
@@ -203,16 +221,16 @@
     </div>
 
     <div id="sky">
-        <div class="cloud" style="top: 5%; left: 5%; font-size: 60px;">☁️</div>
-        <div class="cloud" style="top: 8%; left: 45%; font-size: 40px; opacity:0.6;">☁️</div>
-        <div class="cloud" style="top: 15%; right: 15%; font-size: 70px;">☁️</div>
-        <div class="cloud" style="top: 25%; left: 25%; font-size: 85px;">☁️</div>
-        <div class="cloud" style="top: 35%; right: 30%; font-size: 50px;">☁️</div>
-        <div class="cloud" style="top: 45%; left: 10%; font-size: 65px;">☁️</div>
-        <div class="cloud" style="top: 55%; right: 5%; font-size: 90px; opacity:0.5;">☁️</div>
-        <div class="cloud" style="top: 65%; left: 40%; font-size: 45px;">☁️</div>
-        <div class="cloud" style="top: 75%; right: 40%; font-size: 60px;">☁️</div>
-        <div class="cloud" style="top: 85%; left: 15%; font-size: 75px; opacity:0.7;">☁️</div>
+        <div class="cloud" style="top: 5%; left: 5%; font-size: clamp(32px,8vw,60px);">☁️</div>
+        <div class="cloud" style="top: 8%; left: 45%; font-size: clamp(22px,5.5vw,40px); opacity:0.6;">☁️</div>
+        <div class="cloud" style="top: 15%; right: 15%; font-size: clamp(38px,9.5vw,70px);">☁️</div>
+        <div class="cloud" style="top: 25%; left: 25%; font-size: clamp(46px,11vw,85px);">☁️</div>
+        <div class="cloud" style="top: 35%; right: 30%; font-size: clamp(28px,7vw,50px);">☁️</div>
+        <div class="cloud" style="top: 45%; left: 10%; font-size: clamp(36px,8.5vw,65px);">☁️</div>
+        <div class="cloud" style="top: 55%; right: 5%; font-size: clamp(48px,12vw,90px); opacity:0.5;">☁️</div>
+        <div class="cloud" style="top: 65%; left: 40%; font-size: clamp(24px,6vw,45px);">☁️</div>
+        <div class="cloud" style="top: 75%; right: 40%; font-size: clamp(32px,8vw,60px);">☁️</div>
+        <div class="cloud" style="top: 85%; left: 15%; font-size: clamp(40px,10vw,75px); opacity:0.7;">☁️</div>
 
         <div class="bird-container bird-1"><svg class="bird-svg" viewBox="0 0 100 100"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#2c3e50" /></svg></div>
         <div class="bird-container bird-2"><svg class="bird-svg" viewBox="0 0 100 100" style="animation-delay: 0.2s;"><path d="M10,50 Q30,20 50,50 Q70,20 90,50 Q80,45 50,55 Q20,45 10,50 Z" fill="#34495e" /></svg></div>
@@ -224,15 +242,20 @@
 
         <div class="track">
             <div id="balloon-doc" class="balloon-container floating">
-                <!-- DOCTOR BALLOON: Red Cross Only -->
-                <svg width="100" height="130" viewBox="0 0 100 120">
+                <!-- Large (tablet) version -->
+                <svg class="balloon-svg-large" width="100" height="130" viewBox="0 0 100 120">
                     <path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#4DD0E1"/>
-
-                    <!-- Clean White Circle with Red Cross -->
                     <circle cx="50" cy="45" r="18" fill="white" />
                     <rect x="46" y="33" width="8" height="24" fill="#FF5252" />
                     <rect x="38" y="41" width="24" height="8" fill="#FF5252" />
-
+                    <rect x="40" y="105" width="20" height="15" fill="#8D6E63"/>
+                </svg>
+                <!-- Small (phone) version -->
+                <svg class="balloon-svg-small" width="62" height="80" viewBox="0 0 100 120">
+                    <path d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#4DD0E1"/>
+                    <circle cx="50" cy="45" r="18" fill="white" />
+                    <rect x="46" y="33" width="8" height="24" fill="#FF5252" />
+                    <rect x="38" y="41" width="24" height="8" fill="#FF5252" />
                     <rect x="40" y="105" width="20" height="15" fill="#8D6E63"/>
                 </svg>
                 <div class="burner" id="burner-doc"></div><div class="label">Dr. Balloon</div>
@@ -241,7 +264,8 @@
 
         <div class="track">
             <div id="balloon-kid" class="balloon-container floating">
-                <svg width="100" height="130" viewBox="0 0 100 120">
+                <!-- Large (tablet) version -->
+                <svg class="balloon-svg-large" width="100" height="130" viewBox="0 0 100 120">
                     <path id="game-bg" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
                     <path id="game-stripe" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
                     <text id="game-sticker-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
@@ -256,6 +280,17 @@
                     <image id="game-img-sticker-4" x="59" y="64" width="18" height="18" href="" style="display:none" preserveAspectRatio="xMidYMid meet"/>
                     <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
                 </svg>
+                <!-- Small (phone) version -->
+                <svg class="balloon-svg-small" width="62" height="80" viewBox="0 0 100 120">
+                    <path id="game-bg-sm" d="M50,5 C20,5 5,25 5,50 C5,75 35,90 40,100 L60,100 C65,90 95,75 95,50 C95,25 80,5 50,5 Z" fill="#FFC107"/>
+                    <path id="game-stripe-sm" d="M30,12 C20,20 15,35 15,50 C15,68 36,88 40,100 L60,100 C64,88 85,68 85,50 C85,35 80,20 70,12 C60,5 40,5 30,12 Z" fill="#FF5252"/>
+                    <text id="game-sticker-sm-0" x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-sm-1" x="68" y="28" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-sm-2" x="50" y="55" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-sm-3" x="32" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <text id="game-sticker-sm-4" x="68" y="73" text-anchor="middle" dominant-baseline="middle" font-size="18"></text>
+                    <rect x="40" y="105" width="20" height="15" fill="#5D4037"/>
+                </svg>
                 <div class="burner" id="burner-kid"></div><div id="kid-label" class="label">You!</div>
             </div>
         </div>
@@ -268,42 +303,42 @@
         const STICKERS = ['🚗', '🚑', '🚒', '🤪', '⭐', '🌈', '❤️', '🦋', '🌸', '💩', '🧸', '🦄'];
         const selectedStickers = new Set();
 
-        // Apply a sticker value (emoji or data URL) to a pair of SVG text+image elements
         function applyStickerToSlot(prefix, slot, value) {
             const textEl = document.getElementById(`${prefix}-sticker-${slot}`);
             const imgEl = document.getElementById(`${prefix}-img-sticker-${slot}`);
+            // Also update small balloon variant if it exists
+            const textSmEl = document.getElementById(`${prefix}-sticker-sm-${slot}`);
             if (!value) {
                 textEl.textContent = '';
-                imgEl.setAttribute('href', '');
-                imgEl.style.display = 'none';
+                if (imgEl) { imgEl.setAttribute('href', ''); imgEl.style.display = 'none'; }
+                if (textSmEl) textSmEl.textContent = '';
             } else if (value.startsWith('data:') || value.startsWith('http')) {
                 textEl.textContent = '';
-                imgEl.setAttribute('href', value);
-                imgEl.style.display = '';
+                if (imgEl) { imgEl.setAttribute('href', value); imgEl.style.display = ''; }
+                if (textSmEl) textSmEl.textContent = '';
             } else {
                 textEl.textContent = value;
-                imgEl.setAttribute('href', '');
-                imgEl.style.display = 'none';
+                if (imgEl) { imgEl.setAttribute('href', ''); imgEl.style.display = 'none'; }
+                if (textSmEl) textSmEl.textContent = value;
             }
         }
 
-        let gamePhase = 'customizing'; // 'customizing' | 'tutorial' | 'waiting' | 'trial' | 'countdown' | 'racing'
+        let gamePhase = 'customizing';
         let currentTutorialStep = 0;
         const TUTORIAL_TOTAL = 4;
 
         function selectColor(btn, bg, stripe) {
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected'); chosenBg = bg; chosenStripe = stripe;
-            document.getElementById('prev-bg').setAttribute('fill', bg); document.getElementById('prev-stripe').setAttribute('fill', stripe);
+            document.getElementById('prev-bg').setAttribute('fill', bg);
+            document.getElementById('prev-stripe').setAttribute('fill', stripe);
         }
 
         function selectSticker(btn, index) {
             if (selectedStickers.has(index)) {
-                selectedStickers.delete(index);
-                btn.classList.remove('selected');
+                selectedStickers.delete(index); btn.classList.remove('selected');
             } else {
-                selectedStickers.add(index);
-                btn.classList.add('selected');
+                selectedStickers.add(index); btn.classList.add('selected');
             }
             updateStickerPreview();
         }
@@ -318,19 +353,21 @@
         function finishCustomization() {
             const kidName = document.getElementById('custom-name').value.trim() || 'You!';
             document.getElementById('kid-label').innerText = kidName;
-            document.getElementById('game-bg').setAttribute('fill', chosenBg); document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
+            document.getElementById('game-bg').setAttribute('fill', chosenBg);
+            document.getElementById('game-stripe').setAttribute('fill', chosenStripe);
+            // Also apply to small balloon variant
+            const bgSm = document.getElementById('game-bg-sm');
+            const stripeSm = document.getElementById('game-stripe-sm');
+            if (bgSm) bgSm.setAttribute('fill', chosenBg);
+            if (stripeSm) stripeSm.setAttribute('fill', chosenStripe);
             const selected = [...selectedStickers].sort((a, b) => a - b);
             for (let slot = 0; slot < 5; slot++) {
                 applyStickerToSlot('game', slot, slot < selected.length ? STICKERS[selected[slot]] : '');
             }
-            // Apply chosen colours to the tutorial demo balloon
             document.getElementById('tutorial-demo-bg').setAttribute('fill', chosenBg);
             document.getElementById('tutorial-demo-stripe').setAttribute('fill', chosenStripe);
             document.getElementById('customization-ui').classList.add('hidden');
-
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-
-            // Show tutorial (reset demo counter for a fresh experience)
             gamePhase = 'tutorial';
             breaths = 0;
             currentTutorialStep = 0;
@@ -342,64 +379,46 @@
         function tutorialNext() {
             currentTutorialStep++;
             if (currentTutorialStep >= TUTORIAL_TOTAL) {
-                // Tutorial complete — automatically start practice/trial so the child can practise
                 document.getElementById('tutorial-ui').classList.add('hidden');
-                startTrialRun();
-                return;
+                startTrialRun(); return;
             }
-            // Reset live demo state when entering step 1 for a fresh demo
             if (currentTutorialStep === 1) {
                 breaths = 0;
                 document.getElementById('breath-counter').innerText = `Demo: ${breaths}`;
                 document.getElementById('tutorial-demo-balloon').style.bottom = '4px';
             }
-            document.querySelectorAll('.tutorial-step').forEach((s, i) => {
-                s.classList.toggle('hidden', i !== currentTutorialStep);
-            });
-            document.querySelectorAll('.dot').forEach((d, i) => {
-                d.classList.toggle('active', i === currentTutorialStep);
-            });
-            if (currentTutorialStep === TUTORIAL_TOTAL - 1) {
-                document.getElementById('tutorial-btn').innerText = "I'm Ready! 🚀";
-            }
+            document.querySelectorAll('.tutorial-step').forEach((s, i) => { s.classList.toggle('hidden', i !== currentTutorialStep); });
+            document.querySelectorAll('.dot').forEach((d, i) => { d.classList.toggle('active', i === currentTutorialStep); });
+            if (currentTutorialStep === TUTORIAL_TOTAL - 1) { document.getElementById('tutorial-btn').innerText = "I'm Ready! 🚀"; }
         }
 
         function showCountdown() {
             gamePhase = 'countdown';
-            // Reset any demo breaths so the real race starts from zero
             breaths = 0;
             document.getElementById('balloon-kid').style.bottom = '0%';
             document.getElementById('balloon-doc').style.bottom = '0%';
             document.getElementById('breath-counter').innerText = `Breaths: 0/${maxBreaths}`;
             document.getElementById('controls').classList.remove('panic-mode');
             document.getElementById('status').classList.remove('panic-text');
-
             const overlay = document.getElementById('countdown-overlay');
             const text = document.getElementById('countdown-text');
             overlay.classList.remove('hidden');
-
             const steps = [
                 { label: 'READY…', bg: '#E65100' },
                 { label: 'GET SET…', bg: '#FFFF00' },
                 { label: 'GO! 🏁', bg: '#38D160' },
             ];
-
             let i = 0;
             function showStep() {
                 if (i >= steps.length) {
-                    overlay.classList.add('hidden');
-                    gamePhase = 'racing';
+                    overlay.classList.add('hidden'); gamePhase = 'racing';
                     document.getElementById('status').innerText = 'Take a big breath to start the race!';
-                    document.getElementById('status').style.color = '#4CAF50';
-                    return;
+                    document.getElementById('status').style.color = '#4CAF50'; return;
                 }
                 overlay.style.backgroundColor = steps[i].bg;
                 text.textContent = steps[i].label;
-                text.classList.remove('count-animate');
-                text.offsetWidth; // trigger reflow to restart animation
-                text.classList.add('count-animate');
-                const delay = i < steps.length - 1 ? 2000 : 1500;
-                i++;
+                text.classList.remove('count-animate'); text.offsetWidth; text.classList.add('count-animate');
+                const delay = i < steps.length - 1 ? 2000 : 1500; i++;
                 setTimeout(showStep, delay);
             }
             showStep();
@@ -436,48 +455,33 @@
                 document.getElementById('conn-indicator').style.color = '#4CAF50';
                 document.getElementById('stealth-pin').style.color = '#4CAF50';
             }
-            if (message.toString() === 'PING') {
-                // Reply so the remote knows the tablet is still alive
-                client.publish(topic, 'PONG');
-            }
+            if (message.toString() === 'PING') { client.publish(topic, 'PONG'); }
             if (message.toString() === 'START' && (gamePhase === 'waiting' || gamePhase === 'trial')) { showCountdown(); }
             if (message.toString() === 'TRIAL' && (gamePhase === 'waiting' || gamePhase === 'trial')) { startTrialRun(); }
             if (message.toString() === 'BREATH') { takeBreath(); }
         });
 
-        let breaths = 0; 
-        const maxBreaths = 30; 
-        const finishHeight = 70; 
+        let breaths = 0;
+        const maxBreaths = 30;
+        const finishHeight = 70;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playBurnerSound(isDoc) {
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             const now = audioCtx.currentTime;
-
-            const bufferSize = audioCtx.sampleRate * 1.5; 
+            const bufferSize = audioCtx.sampleRate * 1.5;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = buffer.getChannelData(0); 
+            const output = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
-
-            const noiseSource = audioCtx.createBufferSource(); 
-            noiseSource.buffer = buffer;
-
-            const filter = audioCtx.createBiquadFilter(); 
-            filter.type = 'lowpass'; 
-            filter.frequency.setValueAtTime(isDoc ? 450 : 350, now); 
-
-            const gainNode = audioCtx.createGain(); 
-            gainNode.gain.setValueAtTime(0, now);
+            const noiseSource = audioCtx.createBufferSource(); noiseSource.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(isDoc ? 450 : 350, now);
+            const gainNode = audioCtx.createGain(); gainNode.gain.setValueAtTime(0, now);
             const maxVolume = isDoc ? 0.4 : 0.8;
-
-            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.1); 
-            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.9); 
+            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.1);
+            gainNode.gain.linearRampToValueAtTime(maxVolume, now + 0.9);
             gainNode.gain.linearRampToValueAtTime(0, now + 1.2);
-
-            noiseSource.connect(filter); 
-            filter.connect(gainNode); 
-            gainNode.connect(audioCtx.destination); 
-
+            noiseSource.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination);
             noiseSource.start(now);
         }
 
@@ -493,7 +497,6 @@
         function takeBreath() {
             if (gamePhase !== 'racing' && gamePhase !== 'tutorial' && gamePhase !== 'trial' && gamePhase !== 'waiting') return;
 
-            // During tutorial or waiting (demo) phase: run a live demo (animate balloon + sound) without win condition
             if (gamePhase === 'tutorial' || gamePhase === 'waiting') {
                 breaths++;
                 playBurnerSound(false);
@@ -501,38 +504,41 @@
                 const burnerKid = document.getElementById('burner-kid');
                 burnerKid.classList.add('active');
                 setTimeout(() => burnerKid.classList.remove('active'), 1000);
-                // Animate the live demo balloon inside the tutorial panel (step 1)
                 if (currentTutorialStep === 1) {
-                    // Track is 140px tall, balloon SVG is 75px, baseline offset is 4px → max rise = 140 - 75 - 4 = 61px
-                    const maxDemoRise = 140 - 75 - 4;
+                    const trackEl = document.querySelector('.tutorial-live-track');
+                    const balloonEl = document.getElementById('tutorial-demo-balloon');
+                    const balloonH = balloonEl.offsetHeight || 75;
+                    const trackH = trackEl ? trackEl.offsetHeight : 140;
+                    const maxDemoRise = trackH - balloonH - 4;
                     const demoPos = Math.min(breaths * 3 + 4, maxDemoRise);
-                    document.getElementById('tutorial-demo-balloon').style.bottom = demoPos + 'px';
+                    balloonEl.style.bottom = demoPos + 'px';
                 }
-                // Cap balloon just below finish line so it never accidentally crosses during demo
                 const demoProgress = Math.min((breaths / maxBreaths) * finishHeight, finishHeight - 4);
                 document.getElementById('balloon-kid').style.bottom = demoProgress + '%';
                 return;
             }
 
-            if (breaths >= maxBreaths) { 
-                breaths = 0; 
-                document.getElementById('balloon-kid').style.bottom = '0%'; 
-                document.getElementById('balloon-doc').style.bottom = '0%'; 
-                document.getElementById('status').innerText = gamePhase === 'trial' ? '🎈 Trial Run! Practice your big breaths!' : 'Take a big breath!'; 
+            if (breaths >= maxBreaths) {
+                breaths = 0;
+                document.getElementById('balloon-kid').style.bottom = '0%';
+                document.getElementById('balloon-doc').style.bottom = '0%';
+                document.getElementById('status').innerText = gamePhase === 'trial' ? '🎈 Trial Run! Practice your big breaths!' : 'Take a big breath!';
                 document.getElementById('controls').classList.remove('panic-mode');
                 document.getElementById('status').classList.remove('panic-text');
                 document.getElementById('breath-counter').innerText = `${gamePhase === 'trial' ? 'Trial' : 'Breaths'}: 0/${maxBreaths}`;
-                return; 
+                return;
             }
 
-            breaths++; 
+            breaths++;
             playBurnerSound(false);
-
             document.getElementById('breath-counter').innerText = `${gamePhase === 'trial' ? 'Trial' : 'Breaths'}: ${breaths}/${maxBreaths}`;
 
-            const kidBalloon = document.getElementById('balloon-kid'); const docBalloon = document.getElementById('balloon-doc');
-            const burnerKid = document.getElementById('burner-kid'); const burnerDoc = document.getElementById('burner-doc');
-            const controls = document.getElementById('controls'); const status = document.getElementById('status');
+            const kidBalloon = document.getElementById('balloon-kid');
+            const docBalloon = document.getElementById('balloon-doc');
+            const burnerKid = document.getElementById('burner-kid');
+            const burnerDoc = document.getElementById('burner-doc');
+            const controls = document.getElementById('controls');
+            const status = document.getElementById('status');
             const kidName = document.getElementById('custom-name').value.trim() || 'You';
 
             burnerKid.classList.add('active'); setTimeout(() => burnerKid.classList.remove('active'), 1000);
@@ -555,41 +561,36 @@
                 }, 300);
             } else if (breaths < 25 && breaths % 2 === 0) {
                 setTimeout(() => {
-                    burnerDoc.classList.add('active'); 
+                    burnerDoc.classList.add('active');
                     setTimeout(() => burnerDoc.classList.remove('active'), 600);
                 }, 400);
             }
 
             if (gamePhase === 'trial') {
                 controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                if (breaths === maxBreaths) {
-                    status.innerText = `🎉 Great practice, ${kidName}! Ask the doctor to start the real race!`;
-                } else if (breaths >= 15 && breaths <= 24) {
+                if (breaths === maxBreaths) { status.innerText = `🎉 Great practice, ${kidName}! Ask the doctor to start the real race!`; }
+                else if (breaths >= 15 && breaths <= 24) {
                     if (breaths % 2 === 0) { status.innerText = `👍 You're doing great — keep those big breaths going!`; }
                     else { status.innerText = `💪 Excellent! Big breaths win the race!`; }
-                } else if (breaths === 25) {
-                    status.innerText = `🌟 Almost there! Just a few more breaths!`;
-                } else {
+                } else if (breaths === 25) { status.innerText = `🌟 Almost there! Just a few more breaths!`; }
+                else {
                     if (breaths < 9) status.innerText = `🎈 Good start! Keep going!`;
                     else if (breaths > 25) status.innerText = `🔥 Almost done — ${maxBreaths - breaths} more!`;
                     else status.innerText = `🎈 Nice breath! Keep practicing!`;
                 }
             } else {
-                if (breaths === maxBreaths) { 
+                if (breaths === maxBreaths) {
                     controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
-                    status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`; 
-                    setTimeout(triggerConfetti, 300); 
-                } 
-                else if (breaths >= 15 && breaths <= 24) {
+                    status.innerText = `🏆 ${kidName} wins!! Dr. Balloon ran out of gas!`;
+                    setTimeout(triggerConfetti, 300);
+                } else if (breaths >= 15 && breaths <= 24) {
                     controls.classList.add('panic-mode'); status.classList.add('panic-text');
-                    if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; } 
+                    if (breaths % 2 === 0) { status.innerText = `⚠️ It's a TIE! Blow HARDER!`; }
                     else { status.innerText = `⚠️ He's right next to you! Don't stop!`; }
-                }
-                else if (breaths === 25) {
+                } else if (breaths === 25) {
                     controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
                     status.innerText = `Yes! You're pulling ahead! Final sprint!`;
-                }
-                else { 
+                } else {
                     controls.classList.remove('panic-mode'); status.classList.remove('panic-text');
                     if (breaths < 9) status.innerText = `Great start! You're in the lead!`;
                     else if (breaths > 25) status.innerText = `Almost there! Only ${maxBreaths - breaths} breaths left!`;
